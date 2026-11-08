@@ -1,0 +1,315 @@
+@page "/"
+@page "/gw"
+@page "/gw/{Gameweek:int}"
+@using System.Globalization
+@implements IDisposable
+@inject ManagerStore Store
+@inject GlobalAverages Averages
+@inject NavigationManager Nav
+@inject SiteMode Site
+
+@* One page, two views: Season (standings after the latest gameweek, season totals) and Gameweek
+   (standings after a chosen gameweek, that gameweek's numbers with the season so far underneath). *@
+
+<PageTitle>@(_gameweekView && _gameweeks.Count > 0 ? $"GW {_selectedGw} · Mini-league" : "Mini-league")</PageTitle>
+
+<LeagueHeader Active="@(_gameweekView ? "gw" : "season")" Description="@Description" GameweekHref="@GameweekHref" />
+
+@foreach (var problem in _snapshot.Problems)
+{
+    <p class="notice notice-error">@problem</p>
+}
+@if (Averages.LastError is { } apiError)
+{
+    <p class="notice notice-warn">@apiError</p>
+}
+
+@if (_snapshot.Managers.Count == 0)
+{
+    <section class="panel empty">
+        <h3>No managers yet</h3>
+        @if (!Site.IsStatic)
+        {
+            <p>
+                Add managers on the <a href="managers">Managers</a> tab by pasting links to their FPL pages.
+                Their gameweek history is fetched from FPL and kept up to date.
+            </p>
+        }
+    </section>
+}
+else
+{
+    @if (_gameweekView)
+    {
+        var index = IndexOf(_selectedGw);
+        var prev = index > 0 ? _gameweeks[index - 1] : (int?)null;
+        var next = index < _gameweeks.Count - 1 ? _gameweeks[index + 1] : (int?)null;
+        <div class="gw-picker">
+            @if (prev is int p)
+            {
+                <a class="btn btn-ghost" href="gw/@p" aria-label="Previous gameweek">‹</a>
+            }
+            else
+            {
+                <span class="btn btn-ghost disabled" aria-hidden="true">‹</span>
+            }
+            @* data-nav lets the published copy's script follow the choice; locally Blazor does. *@
+            <select aria-label="Gameweek" data-nav value="@($"gw/{_selectedGw}")" @onchange="OnGameweekPicked">
+                @foreach (var gw in _gameweeks)
+                {
+                    <option value="gw/@gw" selected="@(gw == _selectedGw)">Gameweek @gw</option>
+                }
+            </select>
+            @if (next is int n)
+            {
+                <a class="btn btn-ghost" href="gw/@n" aria-label="Next gameweek">›</a>
+            }
+            else
+            {
+                <span class="btn btn-ghost disabled" aria-hidden="true">›</span>
+            }
+        </div>
+    }
+
+    <section class="panel">
+        <header>
+            <h3>@(_gameweekView ? $"Standings after gameweek {_selectedGw}" : "Season standings")</h3>
+            @if (_gameweekView)
+            {
+                <span class="muted">
+                    Global average:
+                    @(_averages.TryGetValue(_selectedGw, out var avg) ? avg.ToString(CultureInfo.InvariantCulture) : "not final yet")
+                </span>
+            }
+            else
+            {
+                <span class="muted">After gameweek @_selectedGw</span>
+            }
+        </header>
+        <div class="table-scroll">
+            <table class="plain board">
+                <thead>
+                    <tr>
+                        <th class="r">#</th>
+                        <th>Manager</th>
+                        <th class="r">Overall points</th>
+                        <th class="r">Behind leader</th>
+                        <th class="r" title="Points left on the bench">
+                            Bench pain<small>@(_gameweekView ? $"GW {_selectedGw}" : "Season")</small>
+                        </th>
+                        <th class="r" title="Gameweek points minus the official FPL global average">
+                            vs global avg<small>@(_gameweekView ? $"GW {_selectedGw}" : "Season")</small>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in _standings)
+                    {
+                        <tr class="@(s.Rank is null ? "not-started" : null)">
+                            <td class="r rank">@Show(s.Rank)</td>
+                            <td class="name">@s.Manager</td>
+                            @if (s.OverallPoints is int op)
+                            {
+                                <td class="r points">
+                                    @if (s.OverallPointsGameweek != _selectedGw)
+                                    {
+                                        <span class="tag" title="@($"{s.SourceFile} has no GW {_selectedGw} row, so this is the total after GW {s.OverallPointsGameweek}")">GW @s.OverallPointsGameweek</span>
+                                    }
+                                    @op.ToString("N0", CultureInfo.InvariantCulture)
+                                </td>
+                                <td class="r">
+                                    @if (s.PointsBehindLeader == 0)
+                                    {
+                                        <span class="muted">Leader</span>
+                                    }
+                                    else
+                                    {
+                                        @Show(s.PointsBehindLeader)
+                                    }
+                                </td>
+                                @if (_gameweekView)
+                                {
+                                    <td class="r">
+                                        @Show(s.BenchPoints)
+                                        <span class="sub">@s.BenchPointsToDate to date</span>
+                                    </td>
+                                    <td class="r">
+                                        @Diff(s.VsAverage)
+                                        <span class="sub">@Signed(SeasonVsAverage(s)) to date</span>
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="r">@s.BenchPointsToDate</td>
+                                    <td class="r">@Diff(SeasonVsAverage(s))</td>
+                                }
+                            }
+                            else
+                            {
+                                <td class="r muted" colspan="4">No data up to gameweek @_selectedGw</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    @if (!_gameweekView)
+    {
+        <section class="panel">
+            <header>
+                <h3>Points vs global average, by gameweek</h3>
+                <span class="muted">Gameweek points minus the official FPL average</span>
+            </header>
+            <div class="table-scroll">
+                <table class="plain grid">
+                    <thead>
+                        <tr>
+                            <th class="sticky">Manager</th>
+                            @foreach (var gw in _gameweeks)
+                            {
+                                <th class="r"><a href="gw/@gw">GW @gw</a></th>
+                            }
+                            <th class="r total">Total</th>
+                        </tr>
+                        <tr class="avg-row">
+                            <td class="sticky">Global average</td>
+                            @foreach (var gw in _gameweeks)
+                            {
+                                @if (_averages.TryGetValue(gw, out var gwAvg))
+                                {
+                                    <td class="r">@gwAvg</td>
+                                }
+                                else
+                                {
+                                    <td class="r" title="FPL hasn't finished this gameweek yet">–</td>
+                                }
+                            }
+                            <td class="total"></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in _standings)
+                        {
+                            var manager = _byFile[s.SourceFile];
+                            <tr>
+                                <td class="name sticky">@s.Manager</td>
+                                @foreach (var gw in _gameweeks)
+                                {
+                                    @if (!manager.Gameweeks.ContainsKey(gw))
+                                    {
+                                        <td class="r missing" title="@($"{s.SourceFile} has no GW {gw} row")">·</td>
+                                    }
+                                    else
+                                    {
+                                        <td class="r">@Diff(LeagueStatistics.VsAverage(manager, gw, _averages))</td>
+                                    }
+                                }
+                                <td class="r total">@Diff(SeasonVsAverage(s))</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+
+    <p class="footnote">
+        Overall points are FPL's OP, which already has transfer hits deducted, so hits aren't subtracted
+        again. A gameweek is compared with the global average once FPL marks it finished; a gameweek
+        missing from a manager's history is left out, not counted as zero.
+    </p>
+}
+
+@code {
+    [Parameter] public int? Gameweek { get; set; }
+
+    private readonly CancellationTokenSource _cts = new();
+    private ManagerStore.Snapshot _snapshot = ManagerStore.Snapshot.Empty;
+    private Dictionary<string, ManagerHistory> _byFile = [];
+    private IReadOnlyList<int> _gameweeks = [];
+    private IReadOnlyDictionary<int, int> _averages = new Dictionary<int, int>();
+    private IReadOnlyList<Standing> _standings = [];
+    private bool _gameweekView;
+    private int _selectedGw;
+
+    private string Description =>
+        _snapshot.Managers.Count == 0 ? "Add managers by pasting their FPL links."
+        : _gameweekView ? $"Gameweek {_selectedGw} · {ManagerCount}"
+        : $"Season so far, after gameweek {_selectedGw} · {ManagerCount}";
+
+    private string ManagerCount =>
+        _snapshot.Managers.Count == 1 ? "1 manager" : $"{_snapshot.Managers.Count} managers";
+
+    private string GameweekHref =>
+        _gameweeks.Count == 0 ? "gw" : $"gw/{(_gameweekView ? _selectedGw : _gameweeks[^1])}";
+
+    protected override void OnInitialized() => Store.Changed += OnStoreChanged;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _gameweekView = Nav.ToBaseRelativePath(Nav.Uri).StartsWith("gw", StringComparison.OrdinalIgnoreCase);
+        await RefreshAsync();
+    }
+
+    private async Task RefreshAsync()
+    {
+        var snapshot = Store.Current;
+        var gameweeks = LeagueStatistics.Gameweeks(snapshot.Managers);
+        try
+        {
+            _averages = await Averages.GetAsync(gameweeks, _cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        _snapshot = snapshot;
+        _byFile = snapshot.Managers.ToDictionary(m => m.SourceFile, StringComparer.OrdinalIgnoreCase);
+        _gameweeks = gameweeks;
+        if (gameweeks.Count == 0)
+        {
+            _standings = [];
+            return;
+        }
+
+        var latest = gameweeks[^1];
+        _selectedGw = _gameweekView ? Math.Clamp(Gameweek ?? latest, gameweeks[0], latest) : latest;
+        _standings = LeagueStatistics.Standings(snapshot.Managers, _selectedGw, _averages);
+    }
+
+    // A CSV was imported, dropped into the data folder, replaced or removed.
+    private void OnStoreChanged() => _ = InvokeAsync(async () =>
+    {
+        await RefreshAsync();
+        StateHasChanged();
+    });
+
+    private void OnGameweekPicked(ChangeEventArgs e) => Nav.NavigateTo($"{e.Value}");
+
+    private int IndexOf(int gameweek) => _gameweeks.Count == 0 ? -1 : gameweek - _gameweeks[0];
+
+    private static int? SeasonVsAverage(Standing s) => s.VsAverageGameweeks > 0 ? s.VsAverageToDate : null;
+
+    private static string Show(int? value) => value?.ToString(CultureInfo.InvariantCulture) ?? "–";
+
+    private static string Signed(int? value) => value switch
+    {
+        null => "–",
+        > 0 => $"+{value}",
+        < 0 => $"−{-value}",
+        _ => "0",
+    };
+
+    private static RenderFragment Diff(int? value) =>
+        @<span class="diff @(value switch { > 0 => "pos", < 0 => "neg", _ => "zero" })">@Signed(value)</span>;
+
+    public void Dispose()
+    {
+        Store.Changed -= OnStoreChanged;
+        // Not disposed: a store callback already queued may still read the token.
+        _cts.Cancel();
+    }
+}

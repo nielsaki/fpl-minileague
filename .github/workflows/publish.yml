@@ -1,0 +1,60 @@
+# Builds the read-only copy of the mini-league site and publishes it on GitHub Pages.
+# Runs every 30 minutes (fresh numbers from FPL), on every push to main (e.g. after adding a manager
+# locally and committing FplMiniLeague/data/), and on demand from the Actions tab.
+# If FPL can't be reached the export fails and the copy already online stays as it is.
+
+name: Publish site
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # The tests only need to run when the code changes, not on every scheduled refresh.
+      - name: Test
+        if: github.event_name != 'schedule'
+        run: dotnet test FplMiniLeague.sln --configuration Release
+
+      - name: Fetch from FPL and export the pages
+        working-directory: FplMiniLeague
+        env:
+          BasePath: /${{ github.event.repository.name }}/
+          TimeZone: Atlantic/Faroe
+        run: dotnet run --configuration Release --no-launch-profile -- --export "$GITHUB_WORKSPACE/site"
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

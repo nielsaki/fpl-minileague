@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="FplMiniLeague.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Manager links and their CSVs are user data, not part of the build output. -->
+    <Content Remove="data\**" />
+    <None Remove="data\**" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,150 @@
+@page "/graphs"
+@implements IDisposable
+@inject ManagerStore Store
+@inject FplEntries Entries
+
+@* The season as it unfolded: points behind the leader and mini-league position after every gameweek. *@
+
+<PageTitle>Graphs · Mini-league</PageTitle>
+
+<LeagueHeader Active="graphs" Description="@Description" />
+
+@if (_behind.Count == 0)
+{
+    <section class="panel empty">
+        <h3>No managers yet</h3>
+        <p>Add managers on the <a href="managers">Managers</a> tab by pasting links to their FPL pages.</p>
+    </section>
+}
+else
+{
+    <div class="legend-row" role="group" aria-label="Highlight a manager">
+        <span class="legend-label">Highlight</span>
+        @foreach (var s in _behind)
+        {
+            var pressed = s.Key == _focused;
+            @* data-key lets the published copy's script do the highlighting; locally Blazor does. *@
+            <button type="button" class="legend-item @(pressed ? "pressed" : null)" aria-pressed="@(pressed ? "true" : "false")"
+                    data-key="@s.Key" style="--c: var(--series-@s.ColorSlot)" @onclick="() => Toggle(s.Key)">
+                <svg viewBox="0 0 18 10" aria-hidden="true">
+                    <line x1="1" x2="17" y1="5" y2="5" />
+                    @switch (s.Shape)
+                    {
+                        case SeriesShape.Square:
+                            <rect x="5.5" y="1.5" width="7" height="7" rx="1" />
+                            break;
+                        case SeriesShape.Diamond:
+                            <path d="M9,0.5L13.5,5L9,9.5L4.5,5Z" />
+                            break;
+                        default:
+                            <circle cx="9" cy="5" r="3.5" />
+                            break;
+                    }
+                </svg>
+                @s.Name
+            </button>
+        }
+        <button type="button" class="link-button" data-legend-clear hidden="@(_focused is null)" @onclick="() => _focused = null">Show all</button>
+    </div>
+
+    <section class="panel">
+        <header>
+            <h3>Points behind the leader</h3>
+            <span class="muted">After each gameweek, GW @_gameweeks[0]–@_gameweeks[^1]</span>
+        </header>
+        <LineChart Gameweeks="_gameweeks" Series="_behind" Kind="ChartKind.PointsBehindLeader" Focused="@_focused"
+                   Description="@($"Points behind the leader after each gameweek, {_behind.Count} managers")" />
+    </section>
+
+    <section class="panel">
+        <header>
+            <h3>League position</h3>
+            <span class="muted">Place in the mini-league after each gameweek</span>
+        </header>
+        <LineChart Gameweeks="_gameweeks" Series="_position" Kind="ChartKind.Position" Focused="@_focused"
+                   Description="@($"Mini-league position after each gameweek, {_position.Count} managers")" />
+    </section>
+
+    <p class="footnote">
+        Hover or tab to a gameweek to see everyone's numbers, hover a name to pick out its line, or click a
+        name above to highlight it in both graphs. A gameweek missing from a manager's history leaves a gap
+        in their line.
+    </p>
+}
+
+@code {
+    private IReadOnlyList<int> _gameweeks = [];
+    private List<ChartSeries> _behind = [];
+    private List<ChartSeries> _position = [];
+    private string? _focused;
+
+    private string Description => _gameweeks.Count == 0
+        ? "Add managers by pasting their FPL links."
+        : $"The season so far, gameweek by gameweek · {_behind.Count} {(_behind.Count == 1 ? "manager" : "managers")}";
+
+    protected override void OnInitialized()
+    {
+        Store.Changed += OnChanged;
+        Build();
+    }
+
+    private void OnChanged() => _ = InvokeAsync(() =>
+    {
+        Build();
+        StateHasChanged();
+    });
+
+    private void Build()
+    {
+        var managers = InColourOrder(Store.Current.Managers);
+        _gameweeks = LeagueStatistics.Gameweeks(managers);
+        var byGameweek = _gameweeks.ToDictionary(gw => gw, gw => LeagueStatistics.Standings(managers, gw, new Dictionary<int, int>())
+            .ToDictionary(s => s.SourceFile, StringComparer.OrdinalIgnoreCase));
+
+        _behind = [];
+        _position = [];
+        for (var slot = 0; slot < managers.Count; slot++)
+        {
+            var manager = managers[slot];
+            var behind = new Dictionary<int, double>();
+            var position = new Dictionary<int, double>();
+            foreach (var gw in _gameweeks)
+            {
+                // Only gameweeks the manager actually has a row for get a point.
+                if (manager.Gameweeks.ContainsKey(gw) && byGameweek[gw][manager.SourceFile] is { Rank: int rank, PointsBehindLeader: int gap })
+                {
+                    behind[gw] = -gap;
+                    position[gw] = rank;
+                }
+            }
+
+            _behind.Add(new ChartSeries(manager.SourceFile, manager.Name, slot, behind));
+            _position.Add(new ChartSeries(manager.SourceFile, manager.Name, slot, position));
+        }
+
+        if (_focused is not null && managers.All(m => m.SourceFile != _focused))
+        {
+            _focused = null;
+        }
+    }
+
+    /// <summary>
+    /// The order colours are handed out in: managers added by link in the order they were added, then
+    /// imported CSVs by name, as on the Managers tab. Adding a manager gives them the next colour
+    /// without repainting anyone else.
+    /// </summary>
+    private List<ManagerHistory> InColourOrder(IReadOnlyList<ManagerHistory> managers)
+    {
+        var linkOrder = Entries.Linked
+            .Select((l, i) => (l.File, i))
+            .ToDictionary(x => x.File, x => x.i, StringComparer.OrdinalIgnoreCase);
+        return managers
+            .OrderBy(m => linkOrder.TryGetValue(m.SourceFile, out var i) ? i : int.MaxValue)
+            .ThenBy(m => m.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+    }
+
+    private void Toggle(string key) => _focused = _focused == key ? null : key;
+
+    public void Dispose() => Store.Changed -= OnChanged;
+}

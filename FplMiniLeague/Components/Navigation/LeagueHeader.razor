@@ -1,0 +1,52 @@
+@implements IDisposable
+@inject FplEntries Entries
+@inject SiteMode Site
+
+@* The banner and tabs shared by every page. Locally it has the "Update from FPL" button and the
+   Managers tab; the published copy has neither, and says when its data was fetched instead. *@
+<SectionHeader Eyebrow="Fantasy Premier League" Title="Mini-league" Description="@Description"
+               Tabs="@Tabs" Active="@Active">
+    <Actions>
+        @if (Site.IsStatic)
+        {
+            @if (LastUpdated is { } updated)
+            {
+                <span class="updated">Updated @Site.FormatTime(updated)</span>
+            }
+        }
+        else if (Entries.Linked.Count > 0)
+        {
+            <button type="button" class="btn btn-light" disabled="@Entries.IsUpdating" @onclick="UpdateAsync">
+                @(Entries.IsUpdating ? "Updating…" : "Update from FPL")
+            </button>
+        }
+    </Actions>
+</SectionHeader>
+
+@code {
+    /// <summary>Key of the current tab: season, gw, graphs or managers.</summary>
+    [Parameter, EditorRequired] public string Active { get; set; } = "";
+
+    [Parameter] public string? Description { get; set; }
+
+    /// <summary>Where the Gameweek tab goes: the chosen gameweek, or "gw" for the latest.</summary>
+    [Parameter] public string GameweekHref { get; set; } = "gw";
+
+    private DateTimeOffset? LastUpdated => Entries.Linked.Max(l => l.LastUpdated);
+
+    private IReadOnlyList<SectionTab> Tabs =>
+    [
+        new("season", "Season", ""),
+        new("gw", "Gameweek", GameweekHref),
+        new("graphs", "Graphs", "graphs"),
+        .. Site.IsStatic ? Array.Empty<SectionTab>() : [new("managers", "Managers", "managers")],
+    ];
+
+    protected override void OnInitialized() => Entries.Changed += OnEntriesChanged;
+
+    private void OnEntriesChanged() => _ = InvokeAsync(StateHasChanged);
+
+    private Task UpdateAsync() => Entries.UpdateAllAsync();
+
+    public void Dispose() => Entries.Changed -= OnEntriesChanged;
+}

@@ -1,0 +1,14 @@
+bin/
+obj/
+TestResults/
+.vs/
+*.user
+.DS_Store
+
+# The exported site is built by the GitHub workflow, never committed.
+site/
+
+# Half-written files and backups from the data folder. The data itself (managers.json and the
+# managers' CSVs) IS committed: it's what the published site is built from.
+FplMiniLeague/data/*.tmp
+FplMiniLeague/data/*.unreadable-*

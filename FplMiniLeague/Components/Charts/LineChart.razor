@@ -1,0 +1,52 @@
+@* A gameweek line chart with its table view underneath, so every value is readable without hovering. *@
+<div class="chart">
+    <div class="chart-scroll">
+        @((MarkupString)LineChartSvg.Render(_layout, Focused, Description))
+    </div>
+    <details class="chart-table">
+        <summary>Show as table</summary>
+        <div class="table-scroll">
+            <table class="plain">
+                <thead>
+                    <tr>
+                        <th>Manager</th>
+                        @foreach (var gw in Gameweeks)
+                        {
+                            <th class="r">GW @gw</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Series)
+                    {
+                        <tr>
+                            <td class="name">@s.Name</td>
+                            @foreach (var gw in Gameweeks)
+                            {
+                                <td class="r">@(s.Values.TryGetValue(gw, out var v) ? LineChartLayout.Format(Kind, v) : "–")</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </details>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<int> Gameweeks { get; set; } = [];
+
+    [Parameter, EditorRequired] public IReadOnlyList<ChartSeries> Series { get; set; } = [];
+
+    [Parameter, EditorRequired] public ChartKind Kind { get; set; }
+
+    /// <summary>Accessible name of the chart.</summary>
+    [Parameter, EditorRequired] public string Description { get; set; } = "";
+
+    /// <summary>Key of the manager to highlight; the other lines fade.</summary>
+    [Parameter] public string? Focused { get; set; }
+
+    private LineChartLayout _layout = LineChartLayout.Build([], [], ChartKind.Position);
+
+    protected override void OnParametersSet() => _layout = LineChartLayout.Build(Gameweeks, Series, Kind);
+}
