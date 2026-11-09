@@ -1,5 +1,5 @@
 @* A manager's key: their line colour with their marker shape, as in the line charts' end labels. *@
-<svg class="series-key" viewBox="0 0 18 10" aria-hidden="true" style="--c: var(--series-@(Slot % 8 + 1))">
+<svg class="series-key" width="18" height="10" viewBox="0 0 18 10" aria-hidden="true" style="--c: var(--series-@(Slot % 8 + 1))">
     <line x1="1" x2="17" y1="5" y2="5" />
     @switch ((SeriesShape)(Slot / 8 % 3))
     {

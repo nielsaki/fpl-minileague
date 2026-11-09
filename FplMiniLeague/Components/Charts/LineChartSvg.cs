@@ -16,7 +16,7 @@ public static class LineChartSvg
     {
         var svg = new StringBuilder();
         var focusClass = focusedKeys.Count == 0 ? "" : " has-focus";
-        Append(svg, $"<svg viewBox=\"0 0 {LineChartLayout.Width:0} {layout.Height:0.#}\" class=\"line-chart focus-scope{focusClass}\" role=\"img\" aria-label=\"{E(description)}\">");
+        Append(svg, $"<svg viewBox=\"0 0 {LineChartLayout.Width:0} {layout.Height:0.#}\" class=\"line-chart focus-scope{focusClass}\" font-size=\"12\" role=\"img\" aria-label=\"{E(description)}\">");
 
         // Grid and y axis.
         svg.Append("<g class=\"grid\">");
@@ -71,9 +71,9 @@ public static class LineChartSvg
         {
             var aria = $"Gameweek {c.Gameweek}: " + string.Join(", ", c.Rows.Select(r => $"{r.Series.Name} {r.Value}"));
             Append(svg, $"<g class=\"cross\" tabindex=\"0\" role=\"img\" aria-label=\"{E(aria)}\">");
-            Append(svg, $"<rect class=\"hit\" x=\"{c.HitLeft:0.#}\" y=\"{layout.PlotTop - 8:0.#}\" width=\"{c.HitWidth:0.#}\" height=\"{layout.PlotBottom - layout.PlotTop + 40:0.#}\"/>");
-            Append(svg, $"<line class=\"hair\" x1=\"{c.X:0.#}\" x2=\"{c.X:0.#}\" y1=\"{layout.PlotTop - 4:0.#}\" y2=\"{layout.PlotBottom + 8:0.#}\"/>");
-            svg.Append("<g class=\"tip\">");
+            Append(svg, $"<rect class=\"hit\" fill=\"transparent\" x=\"{c.HitLeft:0.#}\" y=\"{layout.PlotTop - 8:0.#}\" width=\"{c.HitWidth:0.#}\" height=\"{layout.PlotBottom - layout.PlotTop + 40:0.#}\"/>");
+            Append(svg, $"<line class=\"hair\" visibility=\"hidden\" x1=\"{c.X:0.#}\" x2=\"{c.X:0.#}\" y1=\"{layout.PlotTop - 4:0.#}\" y2=\"{layout.PlotBottom + 8:0.#}\"/>");
+            svg.Append("<g class=\"tip\" visibility=\"hidden\">");
             Append(svg, $"<rect class=\"tip-bg\" x=\"{c.TipX:0.#}\" y=\"{c.TipY:0.#}\" width=\"{c.TipWidth:0.#}\" height=\"{c.TipHeight:0.#}\" rx=\"10\"/>");
             Append(svg, $"<text class=\"tip-title\" x=\"{c.TipX + 12:0.#}\" y=\"{c.TipY + 21:0.#}\">Gameweek {c.Gameweek}</text>");
             for (var i = 0; i < c.Rows.Count; i++)

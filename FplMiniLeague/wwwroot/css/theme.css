@@ -626,6 +626,7 @@ table.grid .total {
     padding: 8px;
     border-radius: var(--radius-md);
     background: rgba(246, 243, 238, 0.92);
+    -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
 }
 

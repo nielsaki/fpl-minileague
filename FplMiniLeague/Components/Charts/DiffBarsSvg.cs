@@ -33,7 +33,7 @@ public static class DiffBarsSvg
     public static string Render(IReadOnlyList<int> gameweeks, IReadOnlyList<Bar> bars, double limit, string description)
     {
         var svg = new StringBuilder();
-        Append(svg, $"<svg viewBox=\"0 0 {Width:0} {Height:0}\" class=\"bars-chart\" role=\"img\" aria-label=\"{E(description)}\">");
+        Append(svg, $"<svg viewBox=\"0 0 {Width:0} {Height:0}\" class=\"bars-chart\" font-size=\"11\" role=\"img\" aria-label=\"{E(description)}\">");
         if (gameweeks.Count == 0)
         {
             return svg.Append("</svg>").ToString();
@@ -78,9 +78,9 @@ public static class DiffBarsSvg
             var tip = $"GW {bar.Gameweek}: {Signed(bar.Difference)} ({bar.Points} pts, average {bar.Average})";
 
             svg.Append("<g class=\"bar\">");
-            Append(svg, $"<rect class=\"hit\" x=\"{x - slot / 2:0.##}\" y=\"{PlotTop - 4:0.#}\" width=\"{slot:0.##}\" height=\"{PlotBottom - PlotTop + 8:0.#}\"/>");
+            Append(svg, $"<rect class=\"hit\" fill=\"transparent\" x=\"{x - slot / 2:0.##}\" y=\"{PlotTop - 4:0.#}\" width=\"{slot:0.##}\" height=\"{PlotBottom - PlotTop + 8:0.#}\"/>");
             Append(svg, $"<path class=\"mark {kind}\" d=\"{Column(x0, x1, zeroY, end)}\"/>");
-            Append(svg, $"<text class=\"bar-tip\" x=\"{PlotLeft:0.#}\" y=\"14\">{E(tip)}</text>");
+            Append(svg, $"<text class=\"bar-tip\" visibility=\"hidden\" x=\"{PlotLeft:0.#}\" y=\"14\">{E(tip)}</text>");
             svg.Append("</g>");
         }
 

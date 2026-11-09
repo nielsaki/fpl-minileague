@@ -33,6 +33,7 @@ builder.Services.AddHttpClient(FplFetcher.HttpClientName, client =>
     client.Timeout = TimeSpan.FromSeconds(20);
 });
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<AssetVersions>();
 builder.Services.AddSingleton<ManagerStore>();
 builder.Services.AddSingleton<FplFetcher>();
 if (!oneOff)
