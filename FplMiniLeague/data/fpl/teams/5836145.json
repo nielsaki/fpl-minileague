@@ -1,0 +1,97 @@
+{
+  "id": 5836145,
+  "playerName": "Leon Johannesen",
+  "teamName": "Leon Destroy",
+  "startedEvent": 1,
+  "currentEvent": 10,
+  "summaryOverallPoints": 546,
+  "summaryEventPoints": 57,
+  "history": [
+    {
+      "event": 1,
+      "points": 41,
+      "totalPoints": 41,
+      "pointsOnBench": 3,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 2,
+      "points": 104,
+      "totalPoints": 145,
+      "pointsOnBench": 4,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 3,
+      "points": 40,
+      "totalPoints": 185,
+      "pointsOnBench": 3,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 4,
+      "points": 71,
+      "totalPoints": 256,
+      "pointsOnBench": 4,
+      "transfers": 3,
+      "transfersCost": 0
+    },
+    {
+      "event": 5,
+      "points": 50,
+      "totalPoints": 306,
+      "pointsOnBench": 13,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 6,
+      "points": 46,
+      "totalPoints": 352,
+      "pointsOnBench": 4,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 7,
+      "points": 51,
+      "totalPoints": 403,
+      "pointsOnBench": 4,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 8,
+      "points": 49,
+      "totalPoints": 428,
+      "pointsOnBench": 14,
+      "transfers": 8,
+      "transfersCost": 24
+    },
+    {
+      "event": 9,
+      "points": 61,
+      "totalPoints": 489,
+      "pointsOnBench": 18,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 10,
+      "points": 23,
+      "totalPoints": 512,
+      "pointsOnBench": 6,
+      "transfers": 0,
+      "transfersCost": 0
+    }
+  ],
+  "chips": [
+    {
+      "name": "wildcard",
+      "event": 7
+    }
+  ]
+}

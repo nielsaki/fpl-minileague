@@ -1,7 +1,16 @@
-# Builds the read-only copy of the mini-league site and publishes it on GitHub Pages.
-# Runs every 30 minutes (fresh numbers from FPL), on every push to main (e.g. after adding a manager
-# locally and committing FplMiniLeague/data/), and on demand from the Actions tab.
-# If FPL can't be reached the export fails and the copy already online stays as it is.
+# Fetches the mini-league from FPL, saves the data in the repository (FplMiniLeague/data/fpl/) and
+# publishes the site on GitHub Pages. The FPL API can't be called from a browser (it sends no CORS
+# headers), so the data is fetched here instead. No secrets are needed: the API is public.
+#
+# - Every 30 minutes: fetches only when something on FPL can have changed (a gameweek is being played
+#   or checked, or teams.txt was edited). Between a gameweek's final check and the next deadline it
+#   stops after a few seconds without asking FPL. New data is committed and the site rebuilt.
+# - On every push to main (e.g. after editing teams.txt): tests, fetches and publishes.
+# - By hand from the Actions tab ("Run workflow"): fetches and publishes straight away.
+#
+# If FPL can't be reached, the saved data is kept and published as it is. If a team in teams.txt can't
+# be found (or a line isn't an ID), the run fails with the reason on its summary page and the site
+# already online stays as it was.
 
 name: Publish site
 
@@ -13,7 +22,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write   # to commit the fetched data
   pages: write
   id-token: write
 
@@ -24,10 +33,35 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.publish.outputs.publish }}
     steps:
       - uses: actions/checkout@v4
 
+      # status.json says when FPL next needs asking (the next deadline while no gameweek is being
+      # played, or nothing once the season is over) and which teams.txt it was fetched with.
+      - name: Check whether FPL can have changed
+        id: due
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          status=FplMiniLeague/data/fpl/status.json
+          due=true
+          if [ "$EVENT" = "schedule" ] && [ -f "$status" ] \
+             && [ "$(jq -r '.teamsFileSha256 // ""' "$status")" = "$(sha256sum teams.txt | cut -d' ' -f1)" ]; then
+            after=$(jq -r '.refreshAfter // ""' "$status")
+            if [ -z "$after" ]; then
+              echo "The season is over and teams.txt is unchanged: nothing to fetch."
+              due=false
+            elif [ "$(date -u +%s)" -lt "$(date -u -d "$after" +%s)" ]; then
+              echo "Nothing on FPL changes before $after: not fetching."
+              due=false
+            fi
+          fi
+          echo "due=$due" >> "$GITHUB_OUTPUT"
+
       - uses: actions/setup-dotnet@v4
+        if: steps.due.outputs.due == 'true'
         with:
           dotnet-version: '8.0.x'
 
@@ -36,7 +70,51 @@ jobs:
         if: github.event_name != 'schedule'
         run: dotnet test FplMiniLeague.sln --configuration Release
 
-      - name: Fetch from FPL and export the pages
+      - name: Fetch from FPL
+        if: steps.due.outputs.due == 'true'
+        working-directory: FplMiniLeague
+        run: dotnet run --configuration Release --no-launch-profile -- --fetch
+
+      - name: Save the fetched data
+        id: save
+        if: steps.due.outputs.due == 'true'
+        run: |
+          git add -A FplMiniLeague/data/fpl
+          if git diff --cached --quiet; then
+            echo "The FPL data hasn't changed."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "Update FPL data"
+          # Someone may have pushed meanwhile. Only this workflow writes data/fpl/, so it rebases cleanly.
+          pushed=false
+          for attempt in 1 2 3; do
+            if git push -q origin "HEAD:$GITHUB_REF_NAME"; then pushed=true; break; fi
+            git pull -q --rebase origin "$GITHUB_REF_NAME"
+          done
+          if [ "$pushed" != true ]; then
+            echo "::error::Couldn't push the fetched FPL data."
+            exit 1
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      # Scheduled runs only publish when the data changed; pushes and manual runs always publish.
+      - name: Decide whether to publish
+        id: publish
+        env:
+          EVENT: ${{ github.event_name }}
+          CHANGED: ${{ steps.save.outputs.changed }}
+        run: |
+          if [ "$EVENT" != "schedule" ] || [ "$CHANGED" = "true" ]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build the pages
+        if: steps.publish.outputs.publish == 'true'
         working-directory: FplMiniLeague
         env:
           BasePath: /${{ github.event.repository.name }}/
@@ -44,13 +122,16 @@ jobs:
         run: dotnet run --configuration Release --no-launch-profile -- --export "$GITHUB_WORKSPACE/site"
 
       - uses: actions/configure-pages@v5
+        if: steps.publish.outputs.publish == 'true'
 
       - uses: actions/upload-pages-artifact@v3
+        if: steps.publish.outputs.publish == 'true'
         with:
           path: site
 
   deploy:
     needs: build
+    if: needs.build.outputs.publish == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

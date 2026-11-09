@@ -1,19 +1,27 @@
 @page "/managers"
 @using System.Globalization
 @implements IDisposable
-@inject FplEntries Entries
 @inject ManagerStore Store
+@inject FplFetcher Fetcher
+@inject SiteMode Site
 
-@* Who is in the mini-league: add managers by pasting their FPL links (or import a CSV), see when
-   each was last fetched, and remove them. *@
+@* Local only: who is in the league according to teams.txt, and how the last fetch from FPL went.
+   Teams are added and removed by editing teams.txt, not here. *@
 
 <PageTitle>Managers · Mini-league</PageTitle>
 
-<LeagueHeader Active="managers" Description="@Description" />
+<LeagueHeader Active="managers" Description="Teams come from teams.txt" />
 
-@foreach (var message in _messages)
+@if (Fetcher.LastResult is { } result)
 {
-    <p class="notice @(message.IsError ? "notice-error" : "notice-ok")" role="status">@message.Text</p>
+    @foreach (var error in result.Errors)
+    {
+        <p class="notice notice-error" role="status">@error</p>
+    }
+    @foreach (var warning in result.Warnings)
+    {
+        <p class="notice notice-warn" role="status">@warning</p>
+    }
 }
 @foreach (var problem in Store.Current.Problems)
 {
@@ -22,38 +30,12 @@
 
 <section class="panel">
     <header>
-        <h3>Add managers</h3>
-    </header>
-    <form class="add-form" @onsubmit="AddAsync" @onsubmit:preventDefault>
-        <input type="text" @bind="_input" @bind:event="oninput" disabled="@_busy" autocomplete="off"
-               aria-label="FPL links or team IDs"
-               placeholder="https://fantasy.premierleague.com/entry/2985395/history" />
-        <button type="submit" class="btn btn-primary" disabled="@(_busy || string.IsNullOrWhiteSpace(_input))">
-            @(_busy ? "Adding…" : "Add")
-        </button>
-    </form>
-    <p class="hint">
-        Paste one or more links to managers' FPL pages, such as their gameweek history or their points page
-        from the league table. Team IDs work too. Their data is fetched now, kept on this computer and
-        updated from FPL every @((int)FplRefresher.Interval.TotalMinutes) minutes.
-    </p>
-    <p class="hint">
-        Have an exported history instead?
-        <label class="link-button">
-            Import a CSV
-            <InputFile OnChange="ImportAsync" multiple accept=".csv,text/csv" class="visually-hidden" />
-        </label>
-    </p>
-</section>
-
-<section class="panel">
-    <header>
         <h3>In the league</h3>
-        <span class="muted">@_rows.Count @(_rows.Count == 1 ? "manager" : "managers")</span>
+        <span class="muted">@Store.Current.TeamIds.Count @(Store.Current.TeamIds.Count == 1 ? "team" : "teams")</span>
     </header>
-    @if (_rows.Count == 0)
+    @if (Store.Current.TeamIds.Count == 0)
     {
-        <p class="muted empty-line">No managers yet. Paste their links above.</p>
+        <p class="muted empty-line">No team IDs in teams.txt yet.</p>
     }
     else
     {
@@ -61,60 +43,30 @@
             <table class="plain managers">
                 <thead>
                     <tr>
+                        <th>Team ID</th>
                         <th>Manager</th>
                         <th>Team</th>
-                        <th>Source</th>
                         <th>Gameweeks</th>
-                        <th>Updated</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var row in _rows)
+                    @foreach (var id in Store.Current.TeamIds)
                     {
+                        var manager = Store.Current.Managers.FirstOrDefault(m => m.EntryId == id);
                         <tr>
-                            <td class="name">@row.Name</td>
-                            <td class="muted">@(row.Link?.TeamName ?? "–")</td>
                             <td>
-                                @if (row.Link is { } link)
-                                {
-                                    <a href="@link.Url" target="_blank" rel="noopener">FPL #@link.EntryId</a>
-                                }
-                                else
-                                {
-                                    <span class="muted">CSV file</span>
-                                }
+                                <a href="@($"https://fantasy.premierleague.com/entry/{id}/history")" target="_blank" rel="noopener">@id</a>
                             </td>
-                            <td>@row.Gameweeks</td>
-                            <td>
-                                @if (row.Link is { } l)
-                                {
-                                    @if (l.LastError is { } error)
-                                    {
-                                        <span class="error-text" title="@error">Update failed</span>
-                                        <span class="sub">@error</span>
-                                    }
-                                    else
-                                    {
-                                        @Time(l.LastUpdated)
-                                    }
-                                }
-                                else
-                                {
-                                    <span class="muted">When imported</span>
-                                }
-                            </td>
-                            <td class="r">
-                                @if (_confirmRemove == row.File)
-                                {
-                                    <button type="button" class="link-button danger" disabled="@_busy" @onclick="() => RemoveAsync(row)">Remove @row.Name</button>
-                                    <button type="button" class="link-button" @onclick="() => _confirmRemove = null">Cancel</button>
-                                }
-                                else
-                                {
-                                    <button type="button" class="link-button" @onclick="() => _confirmRemove = row.File">Remove</button>
-                                }
-                            </td>
+                            @if (manager is null)
+                            {
+                                <td colspan="3" class="muted">Not fetched from FPL yet</td>
+                            }
+                            else
+                            {
+                                <td class="name">@manager.Name</td>
+                                <td class="muted">@manager.TeamName</td>
+                                <td>@Span(manager)</td>
+                            }
                         </tr>
                     }
                 </tbody>
@@ -123,167 +75,52 @@
     }
 </section>
 
-<p class="footnote">
-    Links are remembered in <code>@System.IO.Path.Combine(Store.DataFolder, FplEntries.RegistryFileName)</code>,
-    and each manager's history is kept as a CSV in the same folder, so the dashboard works even when FPL
-    can't be reached.
-</p>
+<section class="panel">
+    <header>
+        <h3>Adding or removing a team</h3>
+    </header>
+    <p class="hint">
+        Edit <code>@Store.TeamsFile</code>: one FPL team ID per line (the number in the team's FPL address,
+        e.g. 2985395 in <code>fantasy.premierleague.com/entry/2985395/history</code>). Anything after
+        <code>#</code> is a note. Saved here, the new team is fetched straight away; committed to GitHub,
+        the published site updates within a few minutes.
+    </p>
+    <p class="hint">
+        @if (Store.Current.Status?.UpdatedAt is { } updated)
+        {
+            @($"FPL data last changed {Site.FormatTime(updated)}. ")
+        }
+        It's saved in <code>@Store.Cache.Folder</code> and fetched again every
+        @((int)FplRefresher.Interval.TotalMinutes) minutes while a gameweek is being played.
+    </p>
+</section>
 
 @code {
-    private sealed record Row(string Name, string File, FplEntries.LinkedManager? Link, string Gameweeks);
-
-    private readonly CancellationTokenSource _cts = new();
-    private List<FplEntries.Message> _messages = [];
-    private List<Row> _rows = [];
-    private string _input = "";
-    private string? _confirmRemove;
-    private bool _busy;
-
-    private string Description => "Add managers by pasting their FPL links";
-
     protected override void OnInitialized()
     {
         Store.Changed += OnChanged;
-        Entries.Changed += OnChanged;
-        BuildRows();
+        Fetcher.Changed += OnChanged;
     }
 
-    private void OnChanged() => _ = InvokeAsync(() =>
-    {
-        BuildRows();
-        StateHasChanged();
-    });
+    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
 
-    // Linked managers first (in the order they were added), then managers imported from CSV files.
-    private void BuildRows()
+    private static string Span(ManagerHistory manager)
     {
-        var managers = Store.Current.Managers.ToDictionary(m => m.SourceFile, StringComparer.OrdinalIgnoreCase);
-        var linked = Entries.Linked;
-        var linkedFiles = linked.Select(l => l.File).ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        _rows =
-        [
-            .. linked.Select(l =>
-            {
-                managers.TryGetValue(l.File, out var m);
-                return new Row(m?.Name ?? l.PlayerName, l.File, l, Span(m));
-            }),
-            .. Store.Current.Managers
-                .Where(m => !linkedFiles.Contains(m.SourceFile))
-                .Select(m => new Row(m.Name, m.SourceFile, null, Span(m))),
-        ];
-    }
-
-    private static string Span(ManagerHistory? manager)
-    {
-        if (manager is null || manager.Gameweeks.Count == 0)
+        if (manager.Gameweeks.Count == 0)
         {
             return "–";
         }
 
         var first = manager.Gameweeks.Keys.Min();
         var last = manager.Gameweeks.Keys.Max();
-        return first == last ? $"GW {first}" : $"GW {first}–{last}";
+        return first == last
+            ? $"GW {first.ToString(CultureInfo.InvariantCulture)}"
+            : $"GW {first.ToString(CultureInfo.InvariantCulture)}–{last.ToString(CultureInfo.InvariantCulture)}";
     }
-
-    private async Task AddAsync()
-    {
-        if (string.IsNullOrWhiteSpace(_input))
-        {
-            return;
-        }
-
-        _busy = true;
-        _messages = [];
-        try
-        {
-            _messages = [.. await Entries.AddAsync(_input, _cts.Token)];
-            if (!_messages.Any(m => m.IsError))
-            {
-                _input = "";
-            }
-        }
-        finally
-        {
-            _busy = false;
-        }
-    }
-
-    private async Task RemoveAsync(Row row)
-    {
-        _busy = true;
-        try
-        {
-            if (row.Link is { } link)
-            {
-                await Entries.RemoveAsync(link.EntryId);
-            }
-            else
-            {
-                Store.Delete(row.File);
-            }
-
-            _messages = [new(false, $"Removed {row.Name}.")];
-            _confirmRemove = null;
-        }
-        finally
-        {
-            _busy = false;
-        }
-    }
-
-    private async Task ImportAsync(InputFileChangeEventArgs e)
-    {
-        const int maxFiles = 50;
-        _messages = [];
-        if (e.FileCount > maxFiles)
-        {
-            _messages.Add(new(true, $"Import at most {maxFiles} files at a time."));
-            return;
-        }
-
-        var imported = new List<string>();
-        foreach (var file in e.GetMultipleFiles(maxFiles))
-        {
-            // A linked manager's CSV is rewritten from FPL on every update, so don't let an import hide in it.
-            if (Entries.Linked.Any(l => string.Equals(l.File, file.Name, StringComparison.OrdinalIgnoreCase)))
-            {
-                _messages.Add(new(true, $"{file.Name} belongs to a manager added by link. Rename the file to import it."));
-                continue;
-            }
-
-            try
-            {
-                await using var stream = file.OpenReadStream(ManagerStore.MaxFileBytes, _cts.Token);
-                var error = await Store.ImportAsync(file.Name, stream, _cts.Token);
-                if (error is null)
-                {
-                    imported.Add(file.Name);
-                }
-                else
-                {
-                    _messages.Add(new(true, error));
-                }
-            }
-            catch (IOException)
-            {
-                _messages.Add(new(true, $"{file.Name}: larger than 1 MB, not imported."));
-            }
-        }
-
-        if (imported.Count > 0)
-        {
-            _messages.Insert(0, new(false, $"Imported {string.Join(", ", imported)}."));
-        }
-    }
-
-    private static string Time(DateTimeOffset? time) =>
-        time?.ToLocalTime().ToString("d MMM HH:mm", CultureInfo.InvariantCulture) ?? "–";
 
     public void Dispose()
     {
         Store.Changed -= OnChanged;
-        Entries.Changed -= OnChanged;
-        _cts.Cancel();
+        Fetcher.Changed -= OnChanged;
     }
 }

@@ -1,0 +1,20 @@
+# FPL team IDs in the mini-league, one per line.
+#
+# A team's ID is the number in its FPL address, e.g. 2985395 in
+# https://fantasy.premierleague.com/entry/2985395/history
+# Anything after # is a note for yourself and is ignored.
+#
+# Add or remove a line and commit: the site fetches the team from FPL and updates within minutes.
+# The order here is the order colours are handed out in on the graphs.
+# Team IDs are new every season, so replace them all when a new season starts.
+
+2985395   # mikkjal jacobsen (MikPik)
+3792988   # Rói Nielsen (Stolurin)
+5202140   # Pauli Pogba (Pogba XI)
+1125906   # Niels Áki Mørk (Tær 11 Pylsurnar)
+5966588   # Óðin Jákupsson (Son of Jakup)
+5590128   # Tummas Sjovara (Grumbilator)
+6869989   # Danjal Haraldsen (wild wolves nasaasaq)
+7794578   # William Nolsøe (Pedronia)
+5836145   # Leon Johannesen (Leon Destroy)
+8227715   # Sølvi Smith (Sølvi burger king)

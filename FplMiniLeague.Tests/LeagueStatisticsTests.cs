@@ -9,8 +9,8 @@ public class LeagueStatisticsTests
 
     private static ManagerHistory Manager(string name, params (int Gw, int Op, int Gwp, int Pb)[] rows) => new()
     {
+        EntryId = Math.Abs(name.GetHashCode()) + 1,
         Name = name,
-        SourceFile = name + ".csv",
         Gameweeks = rows.ToDictionary(r => r.Gw, r => new GameweekEntry(r.Gw, r.Op, r.Gwp, r.Pb)),
     };
 
@@ -79,18 +79,28 @@ public class LeagueStatisticsTests
     [Fact]
     public void Transfer_hits_are_not_taken_off_twice()
     {
-        // GW2: 70 points with a -4 hit. FPL's OP already has the hit deducted (60 + 70 - 4 = 126).
-        const string csv = """
-            GW,OR,OP,GWP,PB,TC,£m
-            1,100000,60,60,0,0,100.0
-            2,90000,126,70,0,4,100.2
-            """;
-        var anna = CsvHistoryParser.Parse(csv, "Anna", "Anna.csv").Manager!;
+        // GW2: 70 points with a -4 hit. FPL's total already has the hit deducted (60 + 70 - 4 = 126).
+        var anna = ManagerStore.ToHistory(new TeamData
+        {
+            Id = 1,
+            PlayerName = "Anna",
+            History = [new(1, 60, 60, 0, 0, 0), new(2, 70, 126, 0, 2, 4)],
+        }, 0);
 
         var gw2 = Assert.Single(LeagueStatistics.Standings([anna], 2, Averages));
 
         Assert.Equal(126, gw2.OverallPoints);
         Assert.Equal(70 - 60, gw2.VsAverage);
+    }
+
+    [Fact]
+    public void Cumulative_series_for_the_graphs()
+    {
+        var anna = Manager("Anna", (1, 60, 60, 5), (2, 126, 70, 3), (3, 156, 30, 11), (4, 200, 44, 2));
+
+        Assert.Equal(new Dictionary<int, double> { [1] = 5, [2] = 8, [3] = 19, [4] = 21 }, LeagueStatistics.CumulativeBench(anna));
+        // GW4 has no final average yet, so it has no point.
+        Assert.Equal(new Dictionary<int, double> { [1] = 10, [2] = 20, [3] = 10 }, LeagueStatistics.CumulativeVsAverage(anna, Averages));
     }
 
     [Fact]

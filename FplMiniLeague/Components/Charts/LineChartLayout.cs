@@ -9,6 +9,12 @@ public enum ChartKind
 
     /// <summary>Mini-league position, 1st at the top.</summary>
     Position,
+
+    /// <summary>A running total from 0 at the bottom (bench points added up).</summary>
+    Total,
+
+    /// <summary>Above or below a zero baseline ("+12", "−8"), the baseline drawn stronger.</summary>
+    Difference,
 }
 
 public enum SeriesShape
@@ -28,7 +34,8 @@ public sealed record ChartSeries(string Key, string Name, int Slot, IReadOnlyDic
     public SeriesShape Shape => (SeriesShape)(Slot / 8 % 3);
 }
 
-public sealed record Tick(double Position, string Label);
+/// <param name="IsBaseline">The zero line of a <see cref="ChartKind.Difference"/> chart.</param>
+public sealed record Tick(double Position, string Label, bool IsBaseline = false);
 
 public sealed record ChartPoint(int Gameweek, double X, double Y, double Value);
 
@@ -131,14 +138,31 @@ public sealed class LineChartLayout
         }
         else
         {
-            var maxBehind = values.Count > 0 ? Math.Max(0, -values.Min()) : 0;
-            var step = NiceStep(maxBehind / 5);
-            var floor = -Math.Max(step, Math.Ceiling(maxBehind / step) * step);
-            y = v => plotTop + -v / -floor * plotHeight;
-            yTicks = [];
-            for (var t = 0.0; t >= floor - 0.001; t -= step)
+            // A clean range that always includes 0: [floor, 0] for points behind, [0, top] for totals,
+            // and both sides of 0 for differences.
+            var low = values.Count > 0 ? Math.Min(0, values.Min()) : 0;
+            var high = values.Count > 0 ? Math.Max(0, values.Max()) : 0;
+            var step = NiceStep((high - low) / (kind == ChartKind.Difference ? 6 : 5));
+            var floor = Math.Floor(low / step) * step;
+            var top = Math.Ceiling(high / step) * step;
+            if (top - floor < step)
             {
-                yTicks.Add(new Tick(y(t), Format(kind, t)));
+                // All zero: still show one step of room.
+                if (kind == ChartKind.PointsBehindLeader)
+                {
+                    floor = -step;
+                }
+                else
+                {
+                    top = step;
+                }
+            }
+
+            y = v => plotTop + (top - v) / (top - floor) * plotHeight;
+            yTicks = [];
+            for (var t = top; t >= floor - 0.001; t -= step)
+            {
+                yTicks.Add(new Tick(y(t), Format(kind, t), kind == ChartKind.Difference && Math.Abs(t) < 0.001));
             }
         }
 
@@ -187,6 +211,7 @@ public sealed class LineChartLayout
             var gw = gameweeks[i];
             var rows = drawn
                 .Where(s => s.Values.ContainsKey(gw))
+                // Best first: 1st place, the leader, the most points (or the most bench pain).
                 .OrderBy(s => kind == ChartKind.Position ? s.Values[gw] : -s.Values[gw])
                 .ThenBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase)
                 .Select(s => new TipRow(s, Format(kind, s.Values[gw])))
@@ -224,6 +249,8 @@ public sealed class LineChartLayout
     {
         ChartKind.Position => Ordinal((int)value),
         _ when value == 0 => "0",
+        ChartKind.Total => value.ToString("0", CultureInfo.InvariantCulture),
+        _ when value > 0 => $"+{value.ToString("0", CultureInfo.InvariantCulture)}",
         _ => $"−{(-value).ToString("0", CultureInfo.InvariantCulture)}",
     };
 

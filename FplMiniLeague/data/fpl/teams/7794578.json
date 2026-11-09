@@ -1,0 +1,92 @@
+{
+  "id": 7794578,
+  "playerName": "William Nolsøe",
+  "teamName": "Pedronia",
+  "startedEvent": 1,
+  "currentEvent": 10,
+  "summaryOverallPoints": 577,
+  "summaryEventPoints": 44,
+  "history": [
+    {
+      "event": 1,
+      "points": 80,
+      "totalPoints": 80,
+      "pointsOnBench": 14,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 2,
+      "points": 90,
+      "totalPoints": 170,
+      "pointsOnBench": 18,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 3,
+      "points": 43,
+      "totalPoints": 213,
+      "pointsOnBench": 5,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 4,
+      "points": 98,
+      "totalPoints": 311,
+      "pointsOnBench": 14,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 5,
+      "points": 39,
+      "totalPoints": 350,
+      "pointsOnBench": 2,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 6,
+      "points": 60,
+      "totalPoints": 410,
+      "pointsOnBench": 9,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 7,
+      "points": 39,
+      "totalPoints": 449,
+      "pointsOnBench": 19,
+      "transfers": 3,
+      "transfersCost": 0
+    },
+    {
+      "event": 8,
+      "points": 20,
+      "totalPoints": 469,
+      "pointsOnBench": 7,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 9,
+      "points": 64,
+      "totalPoints": 533,
+      "pointsOnBench": 15,
+      "transfers": 4,
+      "transfersCost": 0
+    },
+    {
+      "event": 10,
+      "points": 18,
+      "totalPoints": 551,
+      "pointsOnBench": 3,
+      "transfers": 0,
+      "transfersCost": 0
+    }
+  ],
+  "chips": []
+}

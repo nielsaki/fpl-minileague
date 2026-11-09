@@ -1,0 +1,84 @@
+@* Weekly points vs the global average: one small column chart per manager, all on one scale so the
+   bars compare across managers. A gameweek without a final average yet has no column. *@
+<div class="multiples focus-scope @(Focused.Count > 0 ? "has-focus" : null)">
+    @foreach (var m in Managers)
+    {
+        var bars = _bars[m.Key];
+        int? total = bars.Count > 0 ? bars.Sum(b => b.Difference) : null;
+        <figure class="multiple @(Focused.Contains(m.Key) ? "focused" : null)" data-key="@m.Key">
+            <figcaption>
+                <SeriesKey Slot="m.Slot" />
+                <span class="name">@m.Name</span>
+                <span class="diff @Class(total)">@(total is int t ? DiffBarsSvg.Signed(t) : "–")</span>
+            </figcaption>
+            @((MarkupString)DiffBarsSvg.Render(Gameweeks, bars, _limit,
+                $"{m.Name}: gameweek points minus the global average, {(total is int s ? DiffBarsSvg.Signed(s) : "no finished gameweeks")} in total"))
+        </figure>
+    }
+</div>
+<details class="chart-table">
+    <summary>Show as table</summary>
+    <div class="table-scroll">
+        <table class="plain">
+            <thead>
+                <tr>
+                    <th>Manager</th>
+                    @foreach (var gw in Gameweeks)
+                    {
+                        <th class="r">GW @gw</th>
+                    }
+                    <th class="r">Total</th>
+                </tr>
+                <tr class="avg-row">
+                    <td>Global average</td>
+                    @foreach (var gw in Gameweeks)
+                    {
+                        <td class="r">@(Averages.TryGetValue(gw, out var avg) ? avg.ToString(System.Globalization.CultureInfo.InvariantCulture) : "–")</td>
+                    }
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var m in Managers)
+                {
+                    var byGw = _bars[m.Key].ToDictionary(b => b.Gameweek);
+                    <tr>
+                        <td class="name">@m.Name</td>
+                        @foreach (var gw in Gameweeks)
+                        {
+                            <td class="r">@(byGw.TryGetValue(gw, out var b) ? DiffBarsSvg.Signed(b.Difference) : "–")</td>
+                        }
+                        <td class="r">@(byGw.Count > 0 ? DiffBarsSvg.Signed(byGw.Values.Sum(b => b.Difference)) : "–")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</details>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<ManagerHistory> Managers { get; set; } = [];
+
+    [Parameter, EditorRequired] public IReadOnlyList<int> Gameweeks { get; set; } = [];
+
+    /// <summary>Final global average per finished gameweek.</summary>
+    [Parameter, EditorRequired] public IReadOnlyDictionary<int, int> Averages { get; set; } = new Dictionary<int, int>();
+
+    /// <summary>Keys of the managers picked for comparison; the other charts fade.</summary>
+    [Parameter] public IReadOnlyCollection<string> Focused { get; set; } = [];
+
+    private Dictionary<string, List<DiffBarsSvg.Bar>> _bars = [];
+    private double _limit = 1;
+
+    protected override void OnParametersSet()
+    {
+        _bars = Managers.ToDictionary(m => m.Key, m => m.Gameweeks.Values
+            .Where(e => Averages.ContainsKey(e.Gameweek))
+            .OrderBy(e => e.Gameweek)
+            .Select(e => new DiffBarsSvg.Bar(e.Gameweek, e.GameweekPoints - Averages[e.Gameweek], e.GameweekPoints, Averages[e.Gameweek]))
+            .ToList());
+        _limit = DiffBarsSvg.Limit(_bars.Values.SelectMany(b => b).Select(b => b.Difference));
+    }
+
+    private static string Class(int? value) => value switch { > 0 => "pos", < 0 => "neg", _ => "zero" };
+}

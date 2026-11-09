@@ -1,0 +1,97 @@
+@using System.Globalization
+@* Free transfers at every deadline: managers down the side, gameweeks across, darker = more saved.
+   The last column is the next deadline, i.e. what each manager has now. A heat grid rather than lines:
+   counts of 0–5 for many managers would put the lines on top of each other. *@
+<div class="table-scroll">
+    <table class="plain grid ft-grid focus-scope @(Focused.Count > 0 ? "has-focus" : null)">
+        <thead>
+            <tr>
+                <th class="sticky">Manager</th>
+                @foreach (var gw in _columns)
+                {
+                    <th class="r @(gw == Now ? "now" : null)">
+                        GW @gw
+                        @if (gw == Now)
+                        {
+                            <small>Now</small>
+                        }
+                    </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var m in Managers)
+            {
+                var weeks = _weeks[m.Key];
+                <tr data-key="@m.Key" class="@(Focused.Contains(m.Key) ? "focused" : null)">
+                    <td class="name sticky"><SeriesKey Slot="m.Slot" /> @m.Name</td>
+                    @foreach (var gw in _columns)
+                    {
+                        var now = gw == Now ? " now" : "";
+                        @if (!weeks.TryGetValue(gw, out var week))
+                        {
+                            <td class="ft@(now)"></td>
+                        }
+                        else if (week.Available is not int available)
+                        {
+                            <td class="r ft ft-none@(now)" title="@($"GW {gw}: unlimited free transfers before the team's first deadline")">–</td>
+                        }
+                        else
+                        {
+                            <td class="@($"r ft ft-{Math.Min(available, 5)}{now}")" title="@Title(week, available)">
+                                @available
+                                @if (week.Chip is "wildcard" or "freehit")
+                                {
+                                    <span class="chip-tag">@ChipTracker.Names(week.Chip).Short</span>
+                                }
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<ManagerHistory> Managers { get; set; } = [];
+
+    [Parameter, EditorRequired] public GameInfo Game { get; set; } = default!;
+
+    /// <summary>The gameweek with the next deadline (the "Now" column); null once the season is over.</summary>
+    [Parameter] public int? Now { get; set; }
+
+    [Parameter] public IReadOnlyCollection<string> Focused { get; set; } = [];
+
+    private Dictionary<string, Dictionary<int, FreeTransfers.Week>> _weeks = [];
+    private List<int> _columns = [];
+
+    protected override void OnParametersSet()
+    {
+        var played = Managers.SelectMany(m => m.Gameweeks.Keys).DefaultIfEmpty(1).Max();
+        var last = Now ?? played;
+        _weeks = Managers.ToDictionary(m => m.Key,
+            m => FreeTransfers.Calculate(m, Game, last).ToDictionary(w => w.Gameweek));
+        var first = _weeks.Values.SelectMany(w => w.Keys).DefaultIfEmpty(last).Min();
+        _columns = Enumerable.Range(first, last - first + 1).ToList();
+    }
+
+    private static string Title(FreeTransfers.Week week, int available)
+    {
+        var saved = $"{available} free transfer{(available == 1 ? "" : "s")}";
+        if (!week.Played)
+        {
+            return $"GW {week.Gameweek}: {saved} for the next deadline";
+        }
+
+        if (week.Chip is "wildcard" or "freehit")
+        {
+            return $"GW {week.Gameweek}: {ChipTracker.Names(week.Chip).Label}, unlimited transfers; {saved} kept";
+        }
+
+        var made = $"{week.Transfers} made";
+        return week.TransferCost > 0
+            ? $"GW {week.Gameweek}: {saved}, {made} (−{week.TransferCost.ToString(CultureInfo.InvariantCulture)} hit)"
+            : $"GW {week.Gameweek}: {saved}, {made}";
+    }
+}

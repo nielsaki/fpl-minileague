@@ -1,0 +1,101 @@
+{
+  "id": 5966588,
+  "playerName": "Óðin Jákupsson",
+  "teamName": "Son of Jakup",
+  "startedEvent": 1,
+  "currentEvent": 10,
+  "summaryOverallPoints": 598,
+  "summaryEventPoints": 82,
+  "history": [
+    {
+      "event": 1,
+      "points": 51,
+      "totalPoints": 51,
+      "pointsOnBench": 4,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 2,
+      "points": 107,
+      "totalPoints": 158,
+      "pointsOnBench": 14,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 3,
+      "points": 29,
+      "totalPoints": 187,
+      "pointsOnBench": 13,
+      "transfers": 2,
+      "transfersCost": 0
+    },
+    {
+      "event": 4,
+      "points": 97,
+      "totalPoints": 284,
+      "pointsOnBench": 27,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 5,
+      "points": 26,
+      "totalPoints": 310,
+      "pointsOnBench": 2,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 6,
+      "points": 52,
+      "totalPoints": 362,
+      "pointsOnBench": 14,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 7,
+      "points": 46,
+      "totalPoints": 408,
+      "pointsOnBench": 4,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 8,
+      "points": 26,
+      "totalPoints": 434,
+      "pointsOnBench": 11,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 9,
+      "points": 82,
+      "totalPoints": 516,
+      "pointsOnBench": 20,
+      "transfers": 3,
+      "transfersCost": 0
+    },
+    {
+      "event": 10,
+      "points": 34,
+      "totalPoints": 550,
+      "pointsOnBench": 8,
+      "transfers": 0,
+      "transfersCost": 0
+    }
+  ],
+  "chips": [
+    {
+      "name": "freehit",
+      "event": 4
+    },
+    {
+      "name": "wildcard",
+      "event": 6
+    }
+  ]
+}

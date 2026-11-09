@@ -1,0 +1,105 @@
+{
+  "id": 1125906,
+  "playerName": "Niels Áki Mørk",
+  "teamName": "Tær 11 Pylsurnar",
+  "startedEvent": 1,
+  "currentEvent": 10,
+  "summaryOverallPoints": 629,
+  "summaryEventPoints": 59,
+  "history": [
+    {
+      "event": 1,
+      "points": 79,
+      "totalPoints": 79,
+      "pointsOnBench": 0,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 2,
+      "points": 91,
+      "totalPoints": 170,
+      "pointsOnBench": 21,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 3,
+      "points": 34,
+      "totalPoints": 204,
+      "pointsOnBench": 6,
+      "transfers": 2,
+      "transfersCost": 0
+    },
+    {
+      "event": 4,
+      "points": 63,
+      "totalPoints": 267,
+      "pointsOnBench": 22,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 5,
+      "points": 51,
+      "totalPoints": 318,
+      "pointsOnBench": 12,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 6,
+      "points": 72,
+      "totalPoints": 390,
+      "pointsOnBench": 4,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 7,
+      "points": 44,
+      "totalPoints": 434,
+      "pointsOnBench": 11,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 8,
+      "points": 49,
+      "totalPoints": 483,
+      "pointsOnBench": 7,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 9,
+      "points": 87,
+      "totalPoints": 570,
+      "pointsOnBench": 24,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 10,
+      "points": 29,
+      "totalPoints": 599,
+      "pointsOnBench": 22,
+      "transfers": 1,
+      "transfersCost": 0
+    }
+  ],
+  "chips": [
+    {
+      "name": "bboost",
+      "event": 1
+    },
+    {
+      "name": "wildcard",
+      "event": 4
+    },
+    {
+      "name": "freehit",
+      "event": 9
+    }
+  ]
+}

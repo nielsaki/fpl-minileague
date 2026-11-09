@@ -43,8 +43,8 @@
     /// <summary>Accessible name of the chart.</summary>
     [Parameter, EditorRequired] public string Description { get; set; } = "";
 
-    /// <summary>Key of the manager to highlight; the other lines fade.</summary>
-    [Parameter] public string? Focused { get; set; }
+    /// <summary>Keys of the managers picked for comparison; the other lines fade.</summary>
+    [Parameter] public IReadOnlyCollection<string> Focused { get; set; } = [];
 
     private LineChartLayout _layout = LineChartLayout.Build([], [], ChartKind.Position);
 

@@ -3,10 +3,10 @@ using FplMiniLeague.Models;
 namespace FplMiniLeague.Services;
 
 /// <summary>
-/// The dashboard's five statistics, worked out from the managers' CSV histories and the official
-/// global gameweek averages.
+/// The leaderboard statistics, worked out from the managers' FPL histories and the official global
+/// gameweek averages.
 /// <list type="bullet">
-/// <item>Overall points come straight from OP, which already has transfer hits taken off, so TC is
+/// <item>Overall points come straight from FPL, which already has transfer hits taken off, so hits are
 /// never subtracted again.</item>
 /// <item>A missing gameweek row is never counted as zero: overall points carry over from the latest
 /// earlier row (and say so), and bench and global-average figures just leave that gameweek out.</item>
@@ -15,8 +15,8 @@ namespace FplMiniLeague.Services;
 public static class LeagueStatistics
 {
     /// <summary>
-    /// Every gameweek from the earliest to the latest found in any CSV, so a gameweek that no file has a
-    /// row for still gets its own page.
+    /// Every gameweek from the earliest to the latest any manager has a row for, so a gameweek that no
+    /// one has a row for still gets its own page.
     /// </summary>
     public static IReadOnlyList<int> Gameweeks(IEnumerable<ManagerHistory> managers)
     {
@@ -67,6 +67,40 @@ public static class LeagueStatistics
             ? entry.GameweekPoints - average
             : null;
 
+    /// <summary>Bench points added up, after each gameweek the manager has a row for.</summary>
+    public static IReadOnlyDictionary<int, double> CumulativeBench(ManagerHistory manager)
+    {
+        var total = 0;
+        var result = new Dictionary<int, double>();
+        foreach (var entry in manager.Gameweeks.Values.OrderBy(e => e.Gameweek))
+        {
+            total += entry.PointsOnBench;
+            result[entry.Gameweek] = total;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// GWP minus the global average, added up, after each gameweek that has both a row and a final
+    /// average. A gameweek still being played has no point yet.
+    /// </summary>
+    public static IReadOnlyDictionary<int, double> CumulativeVsAverage(ManagerHistory manager, IReadOnlyDictionary<int, int> averages)
+    {
+        var total = 0;
+        var result = new Dictionary<int, double>();
+        foreach (var entry in manager.Gameweeks.Values.OrderBy(e => e.Gameweek))
+        {
+            if (averages.TryGetValue(entry.Gameweek, out var average))
+            {
+                total += entry.GameweekPoints - average;
+                result[entry.Gameweek] = total;
+            }
+        }
+
+        return result;
+    }
+
     private static Standing ForManager(ManagerHistory manager, int gameweek, IReadOnlyDictionary<int, int> averages)
     {
         var upTo = manager.Gameweeks.Values.Where(e => e.Gameweek <= gameweek).ToList();
@@ -77,7 +111,8 @@ public static class LeagueStatistics
         return new Standing
         {
             Manager = manager.Name,
-            SourceFile = manager.SourceFile,
+            TeamName = manager.TeamName,
+            Key = manager.Key,
             OverallPoints = latest?.OverallPoints,
             OverallPointsGameweek = latest?.Gameweek,
             BenchPoints = current?.PointsOnBench,

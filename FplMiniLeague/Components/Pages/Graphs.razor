@@ -1,50 +1,45 @@
 @page "/graphs"
 @implements IDisposable
 @inject ManagerStore Store
-@inject FplEntries Entries
+@inject SiteMode Site
 
-@* The season as it unfolded: points behind the leader and mini-league position after every gameweek. *@
+@* The season as it unfolded, gameweek by gameweek: points behind the leader, league position, bench
+   pain, points vs the global average, and free transfers. *@
 
 <PageTitle>Graphs · Mini-league</PageTitle>
 
 <LeagueHeader Active="graphs" Description="@Description" />
 
-@if (_behind.Count == 0)
+@if (_managers.Count == 0)
 {
     <section class="panel empty">
-        <h3>No managers yet</h3>
-        <p>Add managers on the <a href="managers">Managers</a> tab by pasting links to their FPL pages.</p>
+        @if (Store.Current.Managers.Count > 0)
+        {
+            <h3>Waiting for gameweek 1</h3>
+            <p>The graphs start once the first deadline of the season has passed.</p>
+        }
+        else
+        {
+            <h3>No managers yet</h3>
+            <p>Add FPL team IDs to <code>teams.txt</code>, one per line.</p>
+        }
     </section>
 }
 else
 {
-    <div class="legend-row" role="group" aria-label="Highlight a manager">
-        <span class="legend-label">Highlight</span>
-        @foreach (var s in _behind)
+    <div class="legend-row" role="group" aria-label="Pick managers to compare">
+        <span class="legend-label">Compare</span>
+        @foreach (var m in _managers)
         {
-            var pressed = s.Key == _focused;
+            var pressed = _focused.Contains(m.Key);
             @* data-key lets the published copy's script do the highlighting; locally Blazor does. *@
             <button type="button" class="legend-item @(pressed ? "pressed" : null)" aria-pressed="@(pressed ? "true" : "false")"
-                    data-key="@s.Key" style="--c: var(--series-@s.ColorSlot)" @onclick="() => Toggle(s.Key)">
-                <svg viewBox="0 0 18 10" aria-hidden="true">
-                    <line x1="1" x2="17" y1="5" y2="5" />
-                    @switch (s.Shape)
-                    {
-                        case SeriesShape.Square:
-                            <rect x="5.5" y="1.5" width="7" height="7" rx="1" />
-                            break;
-                        case SeriesShape.Diamond:
-                            <path d="M9,0.5L13.5,5L9,9.5L4.5,5Z" />
-                            break;
-                        default:
-                            <circle cx="9" cy="5" r="3.5" />
-                            break;
-                    }
-                </svg>
-                @s.Name
+                    data-key="@m.Key" @onclick="() => Toggle(m.Key)">
+                <SeriesKey Slot="m.Slot" />
+                @m.Name
             </button>
         }
-        <button type="button" class="link-button" data-legend-clear hidden="@(_focused is null)" @onclick="() => _focused = null">Show all</button>
+        <button type="button" class="link-button" data-legend-clear hidden="@(_focused.Count == 0)" @onclick="() => _focused.Clear()">Show all</button>
     </div>
 
     <section class="panel">
@@ -52,7 +47,7 @@ else
             <h3>Points behind the leader</h3>
             <span class="muted">After each gameweek, GW @_gameweeks[0]–@_gameweeks[^1]</span>
         </header>
-        <LineChart Gameweeks="_gameweeks" Series="_behind" Kind="ChartKind.PointsBehindLeader" Focused="@_focused"
+        <LineChart Gameweeks="_gameweeks" Series="_behind" Kind="ChartKind.PointsBehindLeader" Focused="_focused"
                    Description="@($"Points behind the leader after each gameweek, {_behind.Count} managers")" />
     </section>
 
@@ -61,26 +56,95 @@ else
             <h3>League position</h3>
             <span class="muted">Place in the mini-league after each gameweek</span>
         </header>
-        <LineChart Gameweeks="_gameweeks" Series="_position" Kind="ChartKind.Position" Focused="@_focused"
+        <LineChart Gameweeks="_gameweeks" Series="_position" Kind="ChartKind.Position" Focused="_focused"
                    Description="@($"Mini-league position after each gameweek, {_position.Count} managers")" />
     </section>
 
+    <section class="panel">
+        <header>
+            <h3>Bench pain</h3>
+            <span class="muted">Points left on the bench, added up over the season</span>
+        </header>
+        <LineChart Gameweeks="_gameweeks" Series="_bench" Kind="ChartKind.Total" Focused="_focused"
+                   Description="@($"Bench points added up after each gameweek, {_bench.Count} managers")" />
+    </section>
+
+    @* Weekly / cumulative switch: two radio buttons and CSS, so it works on the published copy too. *@
+    <section class="panel switchable">
+        <header>
+            <div>
+                <h3>Points vs global average</h3>
+                <span class="muted">Gameweek points minus the official FPL average</span>
+            </div>
+            <div class="view-switch" role="radiogroup" aria-label="View">
+                <input type="radio" name="vs-view" id="vs-weekly" value="weekly" class="visually-hidden" />
+                <label for="vs-weekly">Weekly</label>
+                <input type="radio" name="vs-view" id="vs-cumulative" value="cumulative" class="visually-hidden" checked />
+                <label for="vs-cumulative">Cumulative</label>
+            </div>
+        </header>
+        <div class="view view-weekly">
+            <DiffBars Managers="_managers" Gameweeks="_gameweeks" Averages="_averages" Focused="_focused" />
+        </div>
+        <div class="view view-cumulative">
+            <LineChart Gameweeks="_gameweeks" Series="_vsAverage" Kind="ChartKind.Difference" Focused="_focused"
+                       Description="@($"Points above or below the global average, added up after each gameweek, {_vsAverage.Count} managers")" />
+        </div>
+    </section>
+
+    @if (_game is not null)
+    {
+        <section class="panel">
+            <header>
+                <h3>Free transfers</h3>
+                <span class="muted">
+                    @if (_game.Next is { } next)
+                    {
+                        @($"Saved at each deadline · now = GW {next.Id}, deadline {Site.FormatTime(next.Deadline)}")
+                    }
+                    else
+                    {
+                        @("Saved at each deadline")
+                    }
+                </span>
+            </header>
+            <FreeTransferGrid Managers="_managers" Game="_game" Now="@_game.Next?.Id" Focused="_focused" />
+            <ul class="ft-key" aria-label="Key">
+                <li><span class="ft-swatch ft-0"></span>0</li>
+                @for (var n = 1; n <= Math.Min(5, _game.MaxFreeTransfers); n++)
+                {
+                    <li><span class="ft-swatch ft-@n"></span>@n</li>
+                }
+                <li><span class="chip-tag">WC</span><span class="chip-tag">FH</span> chip played: transfers that week were free</li>
+                <li>– unlimited (before the first deadline)</li>
+            </ul>
+        </section>
+    }
+
     <p class="footnote">
-        Hover or tab to a gameweek to see everyone's numbers, hover a name to pick out its line, or click a
-        name above to highlight it in both graphs. A gameweek missing from a manager's history leaves a gap
-        in their line.
+        Click names above to compare managers in every graph; click again to drop them. Hover or tab to a
+        gameweek for everyone's numbers. A gameweek joins the global-average graphs once FPL marks it
+        finished. Free transfers aren't published by FPL, so they're worked out from each manager's
+        transfers, hits and chips with this season's rules: one more each gameweek, up to
+        @(_game?.MaxFreeTransfers ?? 5) saved, and a Wildcard or Free Hit keeps the saved ones without
+        adding one. Transfers for the next deadline don't show until it has passed.
     </p>
 }
 
 @code {
+    private IReadOnlyList<ManagerHistory> _managers = [];
     private IReadOnlyList<int> _gameweeks = [];
+    private IReadOnlyDictionary<int, int> _averages = new Dictionary<int, int>();
+    private GameInfo? _game;
     private List<ChartSeries> _behind = [];
     private List<ChartSeries> _position = [];
-    private string? _focused;
+    private List<ChartSeries> _bench = [];
+    private List<ChartSeries> _vsAverage = [];
+    private readonly HashSet<string> _focused = [];
 
     private string Description => _gameweeks.Count == 0
-        ? "Add managers by pasting their FPL links."
-        : $"The season so far, gameweek by gameweek · {_behind.Count} {(_behind.Count == 1 ? "manager" : "managers")}";
+        ? "Add FPL team IDs to teams.txt."
+        : $"The season so far, gameweek by gameweek · {_managers.Count} {(_managers.Count == 1 ? "manager" : "managers")}";
 
     protected override void OnInitialized()
     {
@@ -96,55 +160,55 @@ else
 
     private void Build()
     {
-        var managers = InColourOrder(Store.Current.Managers);
-        _gameweeks = LeagueStatistics.Gameweeks(managers);
-        var byGameweek = _gameweeks.ToDictionary(gw => gw, gw => LeagueStatistics.Standings(managers, gw, new Dictionary<int, int>())
-            .ToDictionary(s => s.SourceFile, StringComparer.OrdinalIgnoreCase));
+        var snapshot = Store.Current;
+        _managers = snapshot.Managers;
+        _game = snapshot.Game;
+        _averages = snapshot.Averages;
+        _gameweeks = LeagueStatistics.Gameweeks(_managers);
+        if (_gameweeks.Count == 0)
+        {
+            _managers = [];
+            return;
+        }
+
+        var byGameweek = _gameweeks.ToDictionary(gw => gw, gw => LeagueStatistics.Standings(_managers, gw, _averages)
+            .ToDictionary(s => s.Key));
 
         _behind = [];
         _position = [];
-        for (var slot = 0; slot < managers.Count; slot++)
+        _bench = [];
+        _vsAverage = [];
+        foreach (var manager in _managers)
         {
-            var manager = managers[slot];
             var behind = new Dictionary<int, double>();
             var position = new Dictionary<int, double>();
             foreach (var gw in _gameweeks)
             {
-                // Only gameweeks the manager actually has a row for get a point.
-                if (manager.Gameweeks.ContainsKey(gw) && byGameweek[gw][manager.SourceFile] is { Rank: int rank, PointsBehindLeader: int gap })
+                // Only gameweeks the manager actually has a row for get a point. The leader is that
+                // gameweek's leader.
+                if (manager.Gameweeks.ContainsKey(gw) && byGameweek[gw][manager.Key] is { Rank: int rank, PointsBehindLeader: int gap })
                 {
                     behind[gw] = -gap;
                     position[gw] = rank;
                 }
             }
 
-            _behind.Add(new ChartSeries(manager.SourceFile, manager.Name, slot, behind));
-            _position.Add(new ChartSeries(manager.SourceFile, manager.Name, slot, position));
+            _behind.Add(new ChartSeries(manager.Key, manager.Name, manager.Slot, behind));
+            _position.Add(new ChartSeries(manager.Key, manager.Name, manager.Slot, position));
+            _bench.Add(new ChartSeries(manager.Key, manager.Name, manager.Slot, LeagueStatistics.CumulativeBench(manager)));
+            _vsAverage.Add(new ChartSeries(manager.Key, manager.Name, manager.Slot, LeagueStatistics.CumulativeVsAverage(manager, _averages)));
         }
 
-        if (_focused is not null && managers.All(m => m.SourceFile != _focused))
-        {
-            _focused = null;
-        }
+        _focused.RemoveWhere(key => _managers.All(m => m.Key != key));
     }
 
-    /// <summary>
-    /// The order colours are handed out in: managers added by link in the order they were added, then
-    /// imported CSVs by name, as on the Managers tab. Adding a manager gives them the next colour
-    /// without repainting anyone else.
-    /// </summary>
-    private List<ManagerHistory> InColourOrder(IReadOnlyList<ManagerHistory> managers)
+    private void Toggle(string key)
     {
-        var linkOrder = Entries.Linked
-            .Select((l, i) => (l.File, i))
-            .ToDictionary(x => x.File, x => x.i, StringComparer.OrdinalIgnoreCase);
-        return managers
-            .OrderBy(m => linkOrder.TryGetValue(m.SourceFile, out var i) ? i : int.MaxValue)
-            .ThenBy(m => m.Name, StringComparer.CurrentCultureIgnoreCase)
-            .ToList();
+        if (!_focused.Remove(key))
+        {
+            _focused.Add(key);
+        }
     }
-
-    private void Toggle(string key) => _focused = _focused == key ? null : key;
 
     public void Dispose() => Store.Changed -= OnChanged;
 }

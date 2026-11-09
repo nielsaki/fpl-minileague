@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Manager links and their CSVs are user data, not part of the build output. -->
+    <!-- The saved FPL data is read from disk at run time, not part of the build output. -->
     <Content Remove="data\**" />
     <None Remove="data\**" />
   </ItemGroup>

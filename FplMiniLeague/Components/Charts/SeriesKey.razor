@@ -1,0 +1,21 @@
+@* A manager's key: their line colour with their marker shape, as in the line charts' end labels. *@
+<svg class="series-key" viewBox="0 0 18 10" aria-hidden="true" style="--c: var(--series-@(Slot % 8 + 1))">
+    <line x1="1" x2="17" y1="5" y2="5" />
+    @switch ((SeriesShape)(Slot / 8 % 3))
+    {
+        case SeriesShape.Square:
+            <rect x="5.5" y="1.5" width="7" height="7" rx="1" />
+            break;
+        case SeriesShape.Diamond:
+            <path d="M9,0.5L13.5,5L9,9.5L4.5,5Z" />
+            break;
+        default:
+            <circle cx="9" cy="5" r="3.5" />
+            break;
+    }
+</svg>
+
+@code {
+    /// <summary>The manager's place in the colour order (<see cref="ChartSeries.Slot"/>).</summary>
+    [Parameter, EditorRequired] public int Slot { get; set; }
+}

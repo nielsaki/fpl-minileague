@@ -1,4 +1,3 @@
-using FplMiniLeague.Models;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 
@@ -6,10 +5,10 @@ namespace FplMiniLeague.Services;
 
 /// <summary>
 /// Builds the read-only copy of the site that is published online (<c>dotnet run -- --export &lt;folder&gt;</c>):
-/// fetches every linked manager and the global averages from FPL, renders each public page (season,
-/// every gameweek, graphs) to an index.html, and copies the stylesheet and script beside them.
-/// If FPL can't be reached it stops with an error, so the copy already online isn't replaced by
-/// stale numbers.
+/// renders each public page (season, every gameweek, graphs, chips) to an index.html from the FPL data
+/// saved in data/fpl/, and copies the stylesheet and script beside them. It makes no FPL requests
+/// itself (that's <c>--fetch</c>), and stops with an error if a team in teams.txt has no saved data,
+/// so the copy already online isn't replaced by an incomplete league.
 /// </summary>
 public static class StaticExporter
 {
@@ -26,37 +25,30 @@ public static class StaticExporter
             return 2;
         }
 
+        var snapshot = app.Services.GetRequiredService<ManagerStore>().Current;
+        foreach (var problem in snapshot.Problems)
+        {
+            log.LogError("{Problem}", problem);
+        }
+
+        foreach (var id in snapshot.Missing)
+        {
+            log.LogError("Team {Id} in teams.txt has no saved FPL data; run with --fetch first", id);
+        }
+
+        if (snapshot.Problems.Count > 0 || snapshot.Missing.Count > 0 || snapshot.Game is null)
+        {
+            if (snapshot.Game is null)
+            {
+                log.LogError("There is no saved FPL data (data/fpl/game.json); run with --fetch first");
+            }
+
+            return 1;
+        }
+
         await app.StartAsync();
         try
         {
-            var entries = app.Services.GetRequiredService<FplEntries>();
-            var store = app.Services.GetRequiredService<ManagerStore>();
-            var averages = app.Services.GetRequiredService<GlobalAverages>();
-
-            await entries.UpdateAllAsync();
-            var failed = entries.Linked.Where(l => l.LastError is not null).ToList();
-            foreach (var link in failed)
-            {
-                log.LogError("{Manager}: {Error}", link.PlayerName, link.LastError);
-            }
-
-            var gameweeks = LeagueStatistics.Gameweeks(store.Current.Managers);
-            await averages.GetAsync(gameweeks);
-            if (averages.LastError is not null)
-            {
-                log.LogError("Global averages: {Error}", averages.LastError);
-            }
-
-            if (failed.Count > 0 || averages.LastError is not null)
-            {
-                return 1;
-            }
-
-            foreach (var problem in store.Current.Problems)
-            {
-                log.LogWarning("{Problem}", problem);
-            }
-
             if (Directory.Exists(root))
             {
                 Directory.Delete(root, recursive: true);
@@ -66,7 +58,8 @@ public static class StaticExporter
             var address = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!.Addresses.First();
             using var http = new HttpClient { BaseAddress = new Uri(address.TrimEnd('/') + "/") };
 
-            string[] routes = ["", "graphs", "gw", .. gameweeks.Select(gw => $"gw/{gw}")];
+            var gameweeks = LeagueStatistics.Gameweeks(snapshot.Managers);
+            string[] routes = ["", "graphs", "chips", "gw", .. gameweeks.Select(gw => $"gw/{gw}")];
             foreach (var route in routes)
             {
                 var html = await http.GetStringAsync(route);
@@ -80,7 +73,7 @@ public static class StaticExporter
             await File.WriteAllTextAsync(Path.Combine(root, Marker), "");
 
             log.LogInformation("Exported {Pages} pages for {Managers} managers to {Folder}",
-                routes.Length, store.Current.Managers.Count, root);
+                routes.Length, snapshot.Managers.Count, root);
             return 0;
         }
         finally

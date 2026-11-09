@@ -1,0 +1,101 @@
+{
+  "id": 5590128,
+  "playerName": "Tummas Sjovara",
+  "teamName": "Grumbilator",
+  "startedEvent": 1,
+  "currentEvent": 10,
+  "summaryOverallPoints": 588,
+  "summaryEventPoints": 57,
+  "history": [
+    {
+      "event": 1,
+      "points": 64,
+      "totalPoints": 64,
+      "pointsOnBench": 21,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 2,
+      "points": 94,
+      "totalPoints": 158,
+      "pointsOnBench": 2,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 3,
+      "points": 43,
+      "totalPoints": 201,
+      "pointsOnBench": 14,
+      "transfers": 2,
+      "transfersCost": 0
+    },
+    {
+      "event": 4,
+      "points": 89,
+      "totalPoints": 290,
+      "pointsOnBench": 17,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 5,
+      "points": 57,
+      "totalPoints": 347,
+      "pointsOnBench": 14,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 6,
+      "points": 56,
+      "totalPoints": 403,
+      "pointsOnBench": 28,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 7,
+      "points": 40,
+      "totalPoints": 443,
+      "pointsOnBench": 15,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 8,
+      "points": 25,
+      "totalPoints": 468,
+      "pointsOnBench": 2,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 9,
+      "points": 63,
+      "totalPoints": 531,
+      "pointsOnBench": 37,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 10,
+      "points": 27,
+      "totalPoints": 558,
+      "pointsOnBench": 4,
+      "transfers": 0,
+      "transfersCost": 0
+    }
+  ],
+  "chips": [
+    {
+      "name": "wildcard",
+      "event": 7
+    },
+    {
+      "name": "freehit",
+      "event": 9
+    }
+  ]
+}

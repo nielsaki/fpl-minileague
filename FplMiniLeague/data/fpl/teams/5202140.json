@@ -1,0 +1,101 @@
+{
+  "id": 5202140,
+  "playerName": "Pauli Pogba",
+  "teamName": "Pogba XI",
+  "startedEvent": 1,
+  "currentEvent": 10,
+  "summaryOverallPoints": 640,
+  "summaryEventPoints": 101,
+  "history": [
+    {
+      "event": 1,
+      "points": 39,
+      "totalPoints": 39,
+      "pointsOnBench": 5,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 2,
+      "points": 95,
+      "totalPoints": 134,
+      "pointsOnBench": 0,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 3,
+      "points": 39,
+      "totalPoints": 173,
+      "pointsOnBench": 2,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 4,
+      "points": 66,
+      "totalPoints": 239,
+      "pointsOnBench": 9,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 5,
+      "points": 47,
+      "totalPoints": 286,
+      "pointsOnBench": 7,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 6,
+      "points": 46,
+      "totalPoints": 332,
+      "pointsOnBench": 17,
+      "transfers": 2,
+      "transfersCost": 0
+    },
+    {
+      "event": 7,
+      "points": 53,
+      "totalPoints": 385,
+      "pointsOnBench": 12,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 8,
+      "points": 88,
+      "totalPoints": 473,
+      "pointsOnBench": 1,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 9,
+      "points": 66,
+      "totalPoints": 539,
+      "pointsOnBench": 17,
+      "transfers": 3,
+      "transfersCost": 0
+    },
+    {
+      "event": 10,
+      "points": 40,
+      "totalPoints": 579,
+      "pointsOnBench": 0,
+      "transfers": 1,
+      "transfersCost": 0
+    }
+  ],
+  "chips": [
+    {
+      "name": "wildcard",
+      "event": 3
+    },
+    {
+      "name": "bboost",
+      "event": 10
+    }
+  ]
+}

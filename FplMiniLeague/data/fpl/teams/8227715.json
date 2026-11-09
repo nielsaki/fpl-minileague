@@ -1,0 +1,97 @@
+{
+  "id": 8227715,
+  "playerName": "Sølvi Smith",
+  "teamName": "Sølvi burger king",
+  "startedEvent": 1,
+  "currentEvent": 10,
+  "summaryOverallPoints": 517,
+  "summaryEventPoints": 39,
+  "history": [
+    {
+      "event": 1,
+      "points": 66,
+      "totalPoints": 66,
+      "pointsOnBench": 0,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 2,
+      "points": 96,
+      "totalPoints": 162,
+      "pointsOnBench": 16,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 3,
+      "points": 33,
+      "totalPoints": 195,
+      "pointsOnBench": 9,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 4,
+      "points": 69,
+      "totalPoints": 264,
+      "pointsOnBench": 14,
+      "transfers": 3,
+      "transfersCost": 0
+    },
+    {
+      "event": 5,
+      "points": 69,
+      "totalPoints": 333,
+      "pointsOnBench": 11,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 6,
+      "points": 41,
+      "totalPoints": 374,
+      "pointsOnBench": 16,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 7,
+      "points": 45,
+      "totalPoints": 419,
+      "pointsOnBench": 16,
+      "transfers": 2,
+      "transfersCost": 0
+    },
+    {
+      "event": 8,
+      "points": 25,
+      "totalPoints": 444,
+      "pointsOnBench": 13,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 9,
+      "points": 34,
+      "totalPoints": 478,
+      "pointsOnBench": 17,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 10,
+      "points": 18,
+      "totalPoints": 496,
+      "pointsOnBench": 6,
+      "transfers": 0,
+      "transfersCost": 0
+    }
+  ],
+  "chips": [
+    {
+      "name": "bboost",
+      "event": 1
+    }
+  ]
+}

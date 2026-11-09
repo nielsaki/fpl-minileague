@@ -7,7 +7,7 @@ public class LineChartTests
     private static readonly int[] Gameweeks = [1, 2, 3, 4];
 
     private static ChartSeries Series(string name, int slot, params (int Gw, double Value)[] values) =>
-        new(name + ".csv", name, slot, values.ToDictionary(v => v.Gw, v => v.Value));
+        new(name, name, slot, values.ToDictionary(v => v.Gw, v => v.Value));
 
     [Fact]
     public void Labels_that_would_overlap_are_pushed_apart_and_keep_their_order()
@@ -100,9 +100,54 @@ public class LineChartTests
     {
         var layout = LineChartLayout.Build(Gameweeks, [Series("<script>x</script> & co", 0, (1, 0))], ChartKind.PointsBehindLeader);
 
-        var svg = LineChartSvg.Render(layout, null, "chart");
+        var svg = LineChartSvg.Render(layout, [], "chart");
 
         Assert.DoesNotContain("<script>", svg);
         Assert.Contains("&lt;script&gt;x&lt;/script&gt; &amp; co", svg);
+    }
+
+    [Fact]
+    public void Differences_read_with_a_sign_and_totals_without()
+    {
+        Assert.Equal("+12", LineChartLayout.Format(ChartKind.Difference, 12));
+        Assert.Equal("−8", LineChartLayout.Format(ChartKind.Difference, -8));
+        Assert.Equal("0", LineChartLayout.Format(ChartKind.Difference, 0));
+        Assert.Equal("143", LineChartLayout.Format(ChartKind.Total, 143));
+    }
+
+    [Fact]
+    public void A_difference_chart_spans_both_sides_of_a_marked_zero_line()
+    {
+        var layout = LineChartLayout.Build(Gameweeks, [Series("Anna", 0, (1, 30), (2, 45)), Series("Bo", 1, (1, -20), (2, -12))], ChartKind.Difference);
+
+        var zero = Assert.Single(layout.YTicks, t => t.IsBaseline);
+        Assert.Equal("0", zero.Label);
+        Assert.True(layout.Series[0].End.Y < zero.Position);
+        Assert.True(layout.Series[1].End.Y > zero.Position);
+        Assert.True(layout.YTicks.Max(t => t.Position) >= layout.Series[1].Points.Max(p => p.Y));
+        Assert.Contains("class=\"zero\"", LineChartSvg.Render(layout, [], "chart"));
+    }
+
+    [Fact]
+    public void A_total_chart_rises_from_zero_at_the_bottom()
+    {
+        var layout = LineChartLayout.Build(Gameweeks, [Series("Anna", 0, (1, 5), (2, 30)), Series("Bo", 1, (1, 0), (2, 12))], ChartKind.Total);
+
+        Assert.Equal(layout.PlotBottom, layout.Series[1].Points[0].Y);
+        Assert.True(layout.Series[0].End.Y < layout.Series[1].End.Y);
+        Assert.Equal("0", layout.YTicks[^1].Label);
+    }
+
+    [Fact]
+    public void Several_managers_can_be_highlighted_at_once()
+    {
+        var layout = LineChartLayout.Build(Gameweeks,
+            [Series("Anna", 0, (1, 0)), Series("Bo", 1, (1, -5)), Series("Cai", 2, (1, -9))], ChartKind.PointsBehindLeader);
+
+        var svg = LineChartSvg.Render(layout, ["Anna", "Cai"], "chart");
+
+        Assert.Contains("has-focus", svg);
+        Assert.Equal(2, svg.Split("series focused").Length - 1);
+        Assert.Contains("data-key=\"Bo\"", svg);
     }
 }

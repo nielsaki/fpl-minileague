@@ -7,21 +7,23 @@ namespace FplMiniLeague.Components.Charts;
 /// <summary>
 /// Draws a <see cref="LineChartLayout"/> as inline SVG. The hover layer is CSS only (see theme.css,
 /// "Charts"): hovering or tabbing to a gameweek shows a hairline and a tooltip listing every manager;
-/// hovering a name at the end of a line fades the others.
+/// hovering a name at the end of a line fades the others. Managers picked in the legend stay bright
+/// and the rest fade.
 /// </summary>
 public static class LineChartSvg
 {
-    public static string Render(LineChartLayout layout, string? focusedKey, string description)
+    public static string Render(LineChartLayout layout, IReadOnlyCollection<string> focusedKeys, string description)
     {
         var svg = new StringBuilder();
-        var focusClass = focusedKey is null ? "" : " has-focus";
-        Append(svg, $"<svg viewBox=\"0 0 {LineChartLayout.Width:0} {layout.Height:0.#}\" class=\"line-chart{focusClass}\" role=\"img\" aria-label=\"{E(description)}\">");
+        var focusClass = focusedKeys.Count == 0 ? "" : " has-focus";
+        Append(svg, $"<svg viewBox=\"0 0 {LineChartLayout.Width:0} {layout.Height:0.#}\" class=\"line-chart focus-scope{focusClass}\" role=\"img\" aria-label=\"{E(description)}\">");
 
         // Grid and y axis.
         svg.Append("<g class=\"grid\">");
         foreach (var t in layout.YTicks)
         {
-            Append(svg, $"<line x1=\"{layout.PlotLeft:0.#}\" x2=\"{layout.PlotRight:0.#}\" y1=\"{t.Position:0.#}\" y2=\"{t.Position:0.#}\"/>");
+            var zero = t.IsBaseline ? " class=\"zero\"" : "";
+            Append(svg, $"<line{zero} x1=\"{layout.PlotLeft:0.#}\" x2=\"{layout.PlotRight:0.#}\" y1=\"{t.Position:0.#}\" y2=\"{t.Position:0.#}\"/>");
         }
 
         svg.Append("</g><g class=\"axis\">");
@@ -40,10 +42,10 @@ public static class LineChartSvg
         svg.Append("</g>");
 
         // One group per manager: line, markers, end label. The end label is inside the group so
-        // hovering it highlights the whole line. A highlighted manager is drawn last, on top.
-        foreach (var s in layout.Series.OrderBy(s => s.Series.Key == focusedKey))
+        // hovering it highlights the whole line. Highlighted managers are drawn last, on top.
+        foreach (var s in layout.Series.OrderBy(s => focusedKeys.Contains(s.Series.Key)))
         {
-            var focused = s.Series.Key == focusedKey ? " focused" : "";
+            var focused = focusedKeys.Contains(s.Series.Key) ? " focused" : "";
             Append(svg, $"<g class=\"series{focused}\" data-key=\"{E(s.Series.Key)}\" style=\"--c: var(--series-{s.Series.ColorSlot})\">");
             Append(svg, $"<path class=\"line\" d=\"{s.Path}\"/>");
             foreach (var p in s.Points)

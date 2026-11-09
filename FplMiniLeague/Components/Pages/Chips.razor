@@ -1,0 +1,146 @@
+@page "/chips"
+@implements IDisposable
+@inject ManagerStore Store
+
+@* Which chips each manager has played (and when) and which they still have, per set of chips. *@
+
+<PageTitle>Chips · Mini-league</PageTitle>
+
+<LeagueHeader Active="chips" Description="@Description" />
+
+@if (_rows.Count == 0 || _game is null)
+{
+    <section class="panel empty">
+        <h3>No managers yet</h3>
+        <p>Add FPL team IDs to <code>teams.txt</code>, one per line.</p>
+    </section>
+}
+else
+{
+    <section class="panel">
+        <header>
+            <h3>Chips</h3>
+            <span class="muted">
+                @(_game.Next is { } next ? $"As of the GW {next.Id} deadline" : "Season over")
+            </span>
+        </header>
+        <div class="table-scroll">
+            <table class="plain chips">
+                <thead>
+                    <tr class="group-row">
+                        <th rowspan="2" class="sticky">Manager</th>
+                        @foreach (var group in _groups)
+                        {
+                            <th colspan="@group.Columns.Count" class="group">
+                                @group.Label <small>GW @group.StartEvent–@group.StopEvent</small>
+                            </th>
+                        }
+                        <th rowspan="2" class="r" title="Chips that can be played at the next deadline">Left</th>
+                    </tr>
+                    <tr>
+                        @foreach (var group in _groups)
+                        {
+                            @for (var i = 0; i < group.Columns.Count; i++)
+                            {
+                                var column = group.Columns[i];
+                                <th class="c @(i == 0 ? "first" : null)" title="@($"{column.Label}, GW {column.StartEvent}–{column.StopEvent}")">
+                                    <abbr title="@column.Label">@column.Short</abbr>
+                                </th>
+                            }
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in _rows)
+                    {
+                        <tr>
+                            <td class="name sticky">
+                                @row.Manager.Name
+                                @if (row.Manager.TeamName.Length > 0)
+                                {
+                                    <span class="sub">@row.Manager.TeamName</span>
+                                }
+                            </td>
+                            @for (var i = 0; i < row.Cells.Count; i++)
+                            {
+                                var cell = row.Cells[i];
+                                var first = _firstInGroup.Contains(i) ? " first" : "";
+                                @switch (cell.State)
+                                {
+                                    case ChipTracker.State.Used:
+                                        <td class="c@(first)"><span class="chip used" title="@($"{cell.Column.Label} played in gameweek {cell.UsedIn}")">GW @cell.UsedIn</span></td>
+                                        break;
+                                    case ChipTracker.State.Available:
+                                        <td class="c@(first)"><span class="chip available" title="@($"{cell.Column.Label} available until gameweek {cell.Column.StopEvent}")">Available</span></td>
+                                        break;
+                                    case ChipTracker.State.Later:
+                                        <td class="c@(first)"><span class="chip later" title="@($"{cell.Column.Label} can be played from gameweek {cell.From}")">From GW @cell.From</span></td>
+                                        break;
+                                    default:
+                                        <td class="c@(first)"><span class="chip expired" title="@($"{cell.Column.Label} not played by gameweek {cell.Column.StopEvent}; it can't be carried over")">Expired</span></td>
+                                        break;
+                                }
+                            }
+                            <td class="r points">@row.AvailableNow</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <p class="footnote">
+        The chips and the gameweeks each set can be played in come from FPL for the @_game.Season season.
+        Chips of one set can't be carried over to the next, only one chip can be played per gameweek, and
+        a Free Hit can't be played the gameweek after another. A chip played in a gameweek still being
+        played shows as soon as its deadline has passed.
+    </p>
+}
+
+@code {
+    private GameInfo? _game;
+    private IReadOnlyList<ChipTracker.Group> _groups = [];
+    private IReadOnlyList<ChipTracker.Row> _rows = [];
+    private HashSet<int> _firstInGroup = [];
+
+    private string Description => _rows.Count == 0
+        ? "Add FPL team IDs to teams.txt."
+        : $"Played and still available · {_rows.Count} {(_rows.Count == 1 ? "manager" : "managers")}";
+
+    protected override void OnInitialized()
+    {
+        Store.Changed += OnChanged;
+        Build();
+    }
+
+    private void OnChanged() => _ = InvokeAsync(() =>
+    {
+        Build();
+        StateHasChanged();
+    });
+
+    private void Build()
+    {
+        var snapshot = Store.Current;
+        _game = snapshot.Game;
+        if (_game is null)
+        {
+            _rows = [];
+            return;
+        }
+
+        _groups = ChipTracker.Groups(_game);
+        _rows = ChipTracker.Rows(snapshot.Managers, _game, _game.Next?.Id);
+
+        // Column index where each set starts, for the divider between sets.
+        _firstInGroup = [];
+        var index = 0;
+        foreach (var group in _groups)
+        {
+            _firstInGroup.Add(index);
+            index += group.Columns.Count;
+        }
+    }
+
+    public void Dispose() => Store.Changed -= OnChanged;
+}

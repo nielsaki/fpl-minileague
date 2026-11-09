@@ -1,0 +1,101 @@
+{
+  "id": 3792988,
+  "playerName": "Rói Nielsen",
+  "teamName": "Stolurin",
+  "startedEvent": 1,
+  "currentEvent": 10,
+  "summaryOverallPoints": 678,
+  "summaryEventPoints": 63,
+  "history": [
+    {
+      "event": 1,
+      "points": 69,
+      "totalPoints": 69,
+      "pointsOnBench": 0,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 2,
+      "points": 109,
+      "totalPoints": 178,
+      "pointsOnBench": 5,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 3,
+      "points": 53,
+      "totalPoints": 231,
+      "pointsOnBench": 19,
+      "transfers": 2,
+      "transfersCost": 0
+    },
+    {
+      "event": 4,
+      "points": 89,
+      "totalPoints": 320,
+      "pointsOnBench": 7,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 5,
+      "points": 78,
+      "totalPoints": 398,
+      "pointsOnBench": 4,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 6,
+      "points": 65,
+      "totalPoints": 463,
+      "pointsOnBench": 20,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 7,
+      "points": 46,
+      "totalPoints": 509,
+      "pointsOnBench": 11,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 8,
+      "points": 36,
+      "totalPoints": 545,
+      "pointsOnBench": 4,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 9,
+      "points": 70,
+      "totalPoints": 615,
+      "pointsOnBench": 17,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 10,
+      "points": 43,
+      "totalPoints": 658,
+      "pointsOnBench": 0,
+      "transfers": 0,
+      "transfersCost": 0
+    }
+  ],
+  "chips": [
+    {
+      "name": "bboost",
+      "event": 1
+    },
+    {
+      "name": "wildcard",
+      "event": 6
+    }
+  ]
+}

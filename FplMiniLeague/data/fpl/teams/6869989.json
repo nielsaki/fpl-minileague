@@ -1,0 +1,97 @@
+{
+  "id": 6869989,
+  "playerName": "Danjal Haraldsen",
+  "teamName": "wild wolves nasaasaq",
+  "startedEvent": 1,
+  "currentEvent": 10,
+  "summaryOverallPoints": 602,
+  "summaryEventPoints": 59,
+  "history": [
+    {
+      "event": 1,
+      "points": 71,
+      "totalPoints": 71,
+      "pointsOnBench": 4,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 2,
+      "points": 106,
+      "totalPoints": 177,
+      "pointsOnBench": 4,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 3,
+      "points": 47,
+      "totalPoints": 224,
+      "pointsOnBench": 12,
+      "transfers": 2,
+      "transfersCost": 0
+    },
+    {
+      "event": 4,
+      "points": 70,
+      "totalPoints": 294,
+      "pointsOnBench": 8,
+      "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 5,
+      "points": 34,
+      "totalPoints": 328,
+      "pointsOnBench": 6,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 6,
+      "points": 68,
+      "totalPoints": 396,
+      "pointsOnBench": 4,
+      "transfers": 2,
+      "transfersCost": 0
+    },
+    {
+      "event": 7,
+      "points": 51,
+      "totalPoints": 447,
+      "pointsOnBench": 8,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 8,
+      "points": 44,
+      "totalPoints": 491,
+      "pointsOnBench": 9,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 9,
+      "points": 52,
+      "totalPoints": 543,
+      "pointsOnBench": 24,
+      "transfers": 2,
+      "transfersCost": 0
+    },
+    {
+      "event": 10,
+      "points": 25,
+      "totalPoints": 568,
+      "pointsOnBench": 8,
+      "transfers": 0,
+      "transfersCost": 0
+    }
+  ],
+  "chips": [
+    {
+      "name": "wildcard",
+      "event": 7
+    }
+  ]
+}
