@@ -3,9 +3,9 @@
   "playerName": "Niels Áki Mørk",
   "teamName": "Tær 11 Pylsurnar",
   "startedEvent": 1,
-  "currentEvent": 10,
-  "summaryOverallPoints": 629,
-  "summaryEventPoints": 59,
+  "currentEvent": 11,
+  "summaryOverallPoints": 655,
+  "summaryEventPoints": 26,
   "history": [
     {
       "event": 1,
@@ -85,6 +85,14 @@
       "totalPoints": 629,
       "pointsOnBench": 22,
       "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 11,
+      "points": 0,
+      "totalPoints": 629,
+      "pointsOnBench": 0,
+      "transfers": 2,
       "transfersCost": 0
     }
   ],

@@ -3,9 +3,9 @@
   "playerName": "Danjal Haraldsen",
   "teamName": "wild wolves nasaasaq",
   "startedEvent": 1,
-  "currentEvent": 10,
-  "summaryOverallPoints": 602,
-  "summaryEventPoints": 59,
+  "currentEvent": 11,
+  "summaryOverallPoints": 617,
+  "summaryEventPoints": 15,
   "history": [
     {
       "event": 1,
@@ -85,6 +85,14 @@
       "totalPoints": 602,
       "pointsOnBench": 12,
       "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 11,
+      "points": 0,
+      "totalPoints": 602,
+      "pointsOnBench": 0,
+      "transfers": 2,
       "transfersCost": 0
     }
   ],

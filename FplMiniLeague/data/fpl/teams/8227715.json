@@ -3,9 +3,9 @@
   "playerName": "Sølvi Smith",
   "teamName": "Sølvi burger king",
   "startedEvent": 1,
-  "currentEvent": 10,
-  "summaryOverallPoints": 523,
-  "summaryEventPoints": 45,
+  "currentEvent": 11,
+  "summaryOverallPoints": 552,
+  "summaryEventPoints": 29,
   "history": [
     {
       "event": 1,
@@ -86,12 +86,24 @@
       "pointsOnBench": 6,
       "transfers": 0,
       "transfersCost": 0
+    },
+    {
+      "event": 11,
+      "points": 0,
+      "totalPoints": 523,
+      "pointsOnBench": 0,
+      "transfers": 0,
+      "transfersCost": 0
     }
   ],
   "chips": [
     {
       "name": "bboost",
       "event": 1
+    },
+    {
+      "name": "freehit",
+      "event": 11
     }
   ]
 }

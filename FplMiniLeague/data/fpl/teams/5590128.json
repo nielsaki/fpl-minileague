@@ -3,9 +3,9 @@
   "playerName": "Tummas Sjovara",
   "teamName": "Grumbilator",
   "startedEvent": 1,
-  "currentEvent": 10,
-  "summaryOverallPoints": 600,
-  "summaryEventPoints": 69,
+  "currentEvent": 11,
+  "summaryOverallPoints": 626,
+  "summaryEventPoints": 26,
   "history": [
     {
       "event": 1,
@@ -85,6 +85,14 @@
       "totalPoints": 600,
       "pointsOnBench": 11,
       "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 11,
+      "points": 0,
+      "totalPoints": 600,
+      "pointsOnBench": 0,
+      "transfers": 2,
       "transfersCost": 0
     }
   ],

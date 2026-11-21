@@ -3,9 +3,9 @@
   "playerName": "Rói Nielsen",
   "teamName": "Stolurin",
   "startedEvent": 1,
-  "currentEvent": 10,
-  "summaryOverallPoints": 678,
-  "summaryEventPoints": 63,
+  "currentEvent": 11,
+  "summaryOverallPoints": 696,
+  "summaryEventPoints": 18,
   "history": [
     {
       "event": 1,
@@ -84,6 +84,14 @@
       "points": 63,
       "totalPoints": 678,
       "pointsOnBench": 12,
+      "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 11,
+      "points": 0,
+      "totalPoints": 678,
+      "pointsOnBench": 0,
       "transfers": 0,
       "transfersCost": 0
     }

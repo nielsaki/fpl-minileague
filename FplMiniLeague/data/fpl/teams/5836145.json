@@ -3,9 +3,9 @@
   "playerName": "Leon Johannesen",
   "teamName": "Leon Destroy",
   "startedEvent": 1,
-  "currentEvent": 10,
-  "summaryOverallPoints": 546,
-  "summaryEventPoints": 57,
+  "currentEvent": 11,
+  "summaryOverallPoints": 584,
+  "summaryEventPoints": 38,
   "history": [
     {
       "event": 1,
@@ -85,6 +85,14 @@
       "totalPoints": 546,
       "pointsOnBench": 17,
       "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 11,
+      "points": 0,
+      "totalPoints": 546,
+      "pointsOnBench": 0,
+      "transfers": 2,
       "transfersCost": 0
     }
   ],
