@@ -4,8 +4,8 @@
   "teamName": "Pogba XI",
   "startedEvent": 1,
   "currentEvent": 11,
-  "summaryOverallPoints": 662,
-  "summaryEventPoints": 22,
+  "summaryOverallPoints": 665,
+  "summaryEventPoints": 25,
   "history": [
     {
       "event": 1,
@@ -89,9 +89,9 @@
     },
     {
       "event": 11,
-      "points": 0,
-      "totalPoints": 640,
-      "pointsOnBench": 0,
+      "points": 25,
+      "totalPoints": 665,
+      "pointsOnBench": 17,
       "transfers": 0,
       "transfersCost": 0
     }

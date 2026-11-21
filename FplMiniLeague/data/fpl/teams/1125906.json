@@ -4,8 +4,8 @@
   "teamName": "Tær 11 Pylsurnar",
   "startedEvent": 1,
   "currentEvent": 11,
-  "summaryOverallPoints": 655,
-  "summaryEventPoints": 26,
+  "summaryOverallPoints": 661,
+  "summaryEventPoints": 32,
   "history": [
     {
       "event": 1,
@@ -89,9 +89,9 @@
     },
     {
       "event": 11,
-      "points": 0,
-      "totalPoints": 629,
-      "pointsOnBench": 0,
+      "points": 32,
+      "totalPoints": 661,
+      "pointsOnBench": 4,
       "transfers": 2,
       "transfersCost": 0
     }

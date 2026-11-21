@@ -4,8 +4,8 @@
   "teamName": "Sølvi burger king",
   "startedEvent": 1,
   "currentEvent": 11,
-  "summaryOverallPoints": 552,
-  "summaryEventPoints": 29,
+  "summaryOverallPoints": 561,
+  "summaryEventPoints": 38,
   "history": [
     {
       "event": 1,
@@ -89,8 +89,8 @@
     },
     {
       "event": 11,
-      "points": 0,
-      "totalPoints": 523,
+      "points": 38,
+      "totalPoints": 561,
       "pointsOnBench": 0,
       "transfers": 0,
       "transfersCost": 0
