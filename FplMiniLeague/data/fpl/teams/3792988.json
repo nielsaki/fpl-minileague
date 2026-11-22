@@ -89,9 +89,9 @@
     },
     {
       "event": 11,
-      "points": 28,
-      "totalPoints": 706,
-      "pointsOnBench": 5,
+      "points": 33,
+      "totalPoints": 711,
+      "pointsOnBench": 7,
       "transfers": 0,
       "transfersCost": 0
     }
