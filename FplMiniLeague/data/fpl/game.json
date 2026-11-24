@@ -95,8 +95,8 @@
     {
       "id": 11,
       "deadline": "2026-11-21T11:00:00+00:00",
-      "finished": false,
-      "dataChecked": false,
+      "finished": true,
+      "dataChecked": true,
       "average": 35,
       "isCurrent": true,
       "isNext": false
