@@ -3,9 +3,9 @@
   "playerName": "William Nolsøe",
   "teamName": "Pedronia",
   "startedEvent": 1,
-  "currentEvent": 11,
+  "currentEvent": 12,
   "summaryOverallPoints": 619,
-  "summaryEventPoints": 42,
+  "summaryEventPoints": 0,
   "history": [
     {
       "event": 1,
@@ -93,6 +93,14 @@
       "totalPoints": 619,
       "pointsOnBench": 9,
       "transfers": 1,
+      "transfersCost": 0
+    },
+    {
+      "event": 12,
+      "points": 0,
+      "totalPoints": 619,
+      "pointsOnBench": 0,
+      "transfers": 0,
       "transfersCost": 0
     }
   ],

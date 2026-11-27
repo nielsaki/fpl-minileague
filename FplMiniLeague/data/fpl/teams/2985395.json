@@ -3,9 +3,9 @@
   "playerName": "mikkjal jacobsen",
   "teamName": "MikPik",
   "startedEvent": 1,
-  "currentEvent": 11,
+  "currentEvent": 12,
   "summaryOverallPoints": 635,
-  "summaryEventPoints": 38,
+  "summaryEventPoints": 0,
   "history": [
     {
       "event": 1,
@@ -93,6 +93,14 @@
       "totalPoints": 635,
       "pointsOnBench": 6,
       "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 12,
+      "points": 0,
+      "totalPoints": 635,
+      "pointsOnBench": 0,
+      "transfers": 3,
       "transfersCost": 0
     }
   ],

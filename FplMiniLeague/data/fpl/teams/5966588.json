@@ -3,9 +3,9 @@
   "playerName": "Óðin Jákupsson",
   "teamName": "Son of Jakup",
   "startedEvent": 1,
-  "currentEvent": 11,
+  "currentEvent": 12,
   "summaryOverallPoints": 626,
-  "summaryEventPoints": 28,
+  "summaryEventPoints": 0,
   "history": [
     {
       "event": 1,
@@ -93,6 +93,14 @@
       "totalPoints": 626,
       "pointsOnBench": 10,
       "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 12,
+      "points": 0,
+      "totalPoints": 626,
+      "pointsOnBench": 0,
+      "transfers": 3,
       "transfersCost": 0
     }
   ],

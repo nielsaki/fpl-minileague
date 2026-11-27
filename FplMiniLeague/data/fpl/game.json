@@ -98,7 +98,7 @@
       "finished": true,
       "dataChecked": true,
       "average": 35,
-      "isCurrent": true,
+      "isCurrent": false,
       "isNext": false
     },
     {
@@ -107,8 +107,8 @@
       "finished": false,
       "dataChecked": false,
       "average": 0,
-      "isCurrent": false,
-      "isNext": true
+      "isCurrent": true,
+      "isNext": false
     },
     {
       "id": 13,
@@ -117,7 +117,7 @@
       "dataChecked": false,
       "average": 0,
       "isCurrent": false,
-      "isNext": false
+      "isNext": true
     },
     {
       "id": 14,

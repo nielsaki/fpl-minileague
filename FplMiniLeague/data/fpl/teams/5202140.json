@@ -3,9 +3,9 @@
   "playerName": "Pauli Pogba",
   "teamName": "Pogba XI",
   "startedEvent": 1,
-  "currentEvent": 11,
+  "currentEvent": 12,
   "summaryOverallPoints": 690,
-  "summaryEventPoints": 50,
+  "summaryEventPoints": 0,
   "history": [
     {
       "event": 1,
@@ -93,6 +93,14 @@
       "totalPoints": 690,
       "pointsOnBench": 17,
       "transfers": 0,
+      "transfersCost": 0
+    },
+    {
+      "event": 12,
+      "points": 0,
+      "totalPoints": 690,
+      "pointsOnBench": 0,
+      "transfers": 1,
       "transfersCost": 0
     }
   ],
