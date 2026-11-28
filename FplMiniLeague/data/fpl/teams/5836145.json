@@ -4,8 +4,8 @@
   "teamName": "Leon Destroy",
   "startedEvent": 1,
   "currentEvent": 12,
-  "summaryOverallPoints": 601,
-  "summaryEventPoints": 0,
+  "summaryOverallPoints": 605,
+  "summaryEventPoints": 4,
   "history": [
     {
       "event": 1,
@@ -97,8 +97,8 @@
     },
     {
       "event": 12,
-      "points": 0,
-      "totalPoints": 601,
+      "points": 4,
+      "totalPoints": 605,
       "pointsOnBench": 0,
       "transfers": 1,
       "transfersCost": 0

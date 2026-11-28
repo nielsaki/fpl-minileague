@@ -4,8 +4,8 @@
   "teamName": "Grumbilator",
   "startedEvent": 1,
   "currentEvent": 12,
-  "summaryOverallPoints": 641,
-  "summaryEventPoints": 0,
+  "summaryOverallPoints": 645,
+  "summaryEventPoints": 4,
   "history": [
     {
       "event": 1,
@@ -97,8 +97,8 @@
     },
     {
       "event": 12,
-      "points": 0,
-      "totalPoints": 641,
+      "points": 4,
+      "totalPoints": 645,
       "pointsOnBench": 0,
       "transfers": 0,
       "transfersCost": 0

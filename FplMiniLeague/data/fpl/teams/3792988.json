@@ -4,8 +4,8 @@
   "teamName": "Stolurin",
   "startedEvent": 1,
   "currentEvent": 12,
-  "summaryOverallPoints": 709,
-  "summaryEventPoints": 0,
+  "summaryOverallPoints": 711,
+  "summaryEventPoints": 2,
   "history": [
     {
       "event": 1,
@@ -97,8 +97,8 @@
     },
     {
       "event": 12,
-      "points": 0,
-      "totalPoints": 709,
+      "points": 2,
+      "totalPoints": 711,
       "pointsOnBench": 0,
       "transfers": 4,
       "transfersCost": 0

@@ -4,8 +4,8 @@
   "teamName": "MikPik",
   "startedEvent": 1,
   "currentEvent": 12,
-  "summaryOverallPoints": 635,
-  "summaryEventPoints": 0,
+  "summaryOverallPoints": 650,
+  "summaryEventPoints": 15,
   "history": [
     {
       "event": 1,
@@ -97,9 +97,9 @@
     },
     {
       "event": 12,
-      "points": 0,
-      "totalPoints": 635,
-      "pointsOnBench": 0,
+      "points": 15,
+      "totalPoints": 650,
+      "pointsOnBench": 2,
       "transfers": 3,
       "transfersCost": 0
     }

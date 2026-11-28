@@ -4,8 +4,8 @@
   "teamName": "wild wolves nasaasaq",
   "startedEvent": 1,
   "currentEvent": 12,
-  "summaryOverallPoints": 629,
-  "summaryEventPoints": 0,
+  "summaryOverallPoints": 633,
+  "summaryEventPoints": 4,
   "history": [
     {
       "event": 1,
@@ -97,8 +97,8 @@
     },
     {
       "event": 12,
-      "points": 0,
-      "totalPoints": 629,
+      "points": 4,
+      "totalPoints": 633,
       "pointsOnBench": 0,
       "transfers": 0,
       "transfersCost": 0

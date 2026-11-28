@@ -4,8 +4,8 @@
   "teamName": "Pedronia",
   "startedEvent": 1,
   "currentEvent": 12,
-  "summaryOverallPoints": 619,
-  "summaryEventPoints": 0,
+  "summaryOverallPoints": 625,
+  "summaryEventPoints": 6,
   "history": [
     {
       "event": 1,
@@ -97,8 +97,8 @@
     },
     {
       "event": 12,
-      "points": 0,
-      "totalPoints": 619,
+      "points": 6,
+      "totalPoints": 625,
       "pointsOnBench": 0,
       "transfers": 0,
       "transfersCost": 0
